@@ -48,7 +48,8 @@ define(function (require, exports, module) {
                 lineText: resultIssues[i].line.text, // the whole line text {String} ex: <p>hallo world</p>
                 lineOffset: resultIssues[i].line.offset, // the char pos excluding the line in which the spell error is {Number} ex: 89
                 lineNumber: resultIssues[i].line.position.line, // the line number in which the error is {Number} ex: 5 0-indexed
-                lineChar: resultIssues[i].offset - resultIssues[i].line.offset, // the char position of the misspelled word {Number} ex: 5 0-indexed, calculated by subtracting the documentOffset - lineOffset
+                lineCharStart: resultIssues[i].offset - resultIssues[i].line.offset, // the starting char position of the misspelled word {Number} ex: 5 0-indexed, calculated by subtracting the documentOffset - lineOffset
+                lineCharEnd: resultIssues[i].offset - resultIssues[i].line.offset + resultIssues[i].length, // the ending char position of the misspelled word {Number} ex: 10 0-indexed, calculated by subtracting the documentOffset - lineOffset + textLength
                 suggestion: resultIssues[i].suggestions[0] // suggestion for the correct spelling. only get the first suggestion from the list of suggestions {String} ex: hello
             });
         }
