@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cspell-lib": "^9.0.2",
     "jquery": "^3.7.1",
     "sharp": "^0.33.3"
   }
