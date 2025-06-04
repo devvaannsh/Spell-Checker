@@ -1,34 +1,35 @@
 define(function (require, exports, module) {
-    const AppInit = brackets.getModule("utils/AppInit"),
-        NodeConnector = brackets.getModule("NodeConnector");
+    const AppInit = brackets.getModule("utils/AppInit");
+    const NodeConnector = brackets.getModule("NodeConnector");
 
     const Driver = require("./src/spell-checker-driver");
 
     let nodeConnector;
 
-    function init() {
-        setTimeout(() => {
-            Driver.driver();
-        }, 5000);
-    }
 
-    async function initializeSpellChecker() {
+    /**
+     * This function will be called when the app is ready and after the node connector is created
+     * this initializes the cspell library and call the required functions for the execution of the spell checking
+     */
+    async function init() {
         try {
-            const cspell = await nodeConnector.execPeer("initCSpell");
-            return cspell;
+            await nodeConnector.execPeer("initCSpell");
+            Driver.setNodeConnector(nodeConnector);
+
+            // TODO: Need to remove the setTimeout from here
+            setTimeout(() => {
+                Driver.driver();
+            }, 5000);
         } catch (error) {
-            console.error("Failed to initialize CSpell:", error);
-            return;
+            console.error("Failed to initialize spell checker:", error);
         }
     }
 
     AppInit.appReady(function () {
+        // as cspell currently is expected to work only in the desktop app
         if (Phoenix.isNativeApp) {
             nodeConnector = NodeConnector.createNodeConnector("cspell-extension", exports);
-            const cspell = initializeSpellChecker();
-            if (cspell) {
-                init();
-            }
+            init();
         } else {
             console.error("CSpell doesn't work in browser apps!");
         }
