@@ -44,6 +44,46 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * This function is called when any change is made in the editor
+     * TODO: we need to make it efficient like it was done for color preview
+     * @private
+     */
+    function _onChanged() {
+        driver();
+    }
+
+    /**
+     * This function is called when the active editor is changed
+     * @private
+     */
+    function _onActiveEditorChanged() {
+        driver();
+
+        // register the change handler for the new editor
+        const activeEditor = EditorManager.getActiveEditor();
+        if (activeEditor) {
+            activeEditor.off("change", _onChanged);
+            activeEditor.on("change", _onChanged);
+        }
+    }
+
+    /**
+     * This function is responsible to register all the required handlers
+     * it is called inside the main.js init function
+     */
+    function registerHandlers() {
+        EditorManager.off("activeEditorChange", _onActiveEditorChanged);
+        EditorManager.on("activeEditorChange", _onActiveEditorChanged);
+
+        const activeEditor = EditorManager.getActiveEditor();
+        if (activeEditor) {
+            activeEditor.off("change", _onChanged);
+            activeEditor.on("change", _onChanged);
+        }
+    }
+
     exports.driver = driver;
+    exports.registerHandlers = registerHandlers;
     exports.setNodeConnector = setNodeConnector;
 });

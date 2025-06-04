@@ -17,6 +17,7 @@ define(function (require, exports, module) {
             Driver.setNodeConnector(nodeConnector);
 
             UI.registerSpellChecker();
+            Driver.registerHandlers();
             Driver.driver();
         } catch (error) {
             console.error("Failed to initialize spell checker:", error);
