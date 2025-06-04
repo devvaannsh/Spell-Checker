@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const EditorManager = brackets.getModule("editor/EditorManager");
 
     const Helper = require("./spell-check-helper");
+    const UI = require("./spell-check-ui");
 
     let nodeConnector;
 
@@ -34,12 +35,12 @@ define(function (require, exports, module) {
 
             // resultIssues has lot of data that we don't need also some data needs to be calculated as per Phoenix requirements
             const errors = Helper.getRequiredDataFromErrors(resultIssues);
-
-            console.log("-------------------------");
-            console.log("errors: ", errors);
-            console.log("-------------------------");
+            // Display errors visually in the editor
+            UI.setErrors(errors);
         } catch (error) {
             console.error("Spell check failed:", error);
+            // Clear any existing errors if the spell check fails
+            UI.clearErrors();
         }
     }
 

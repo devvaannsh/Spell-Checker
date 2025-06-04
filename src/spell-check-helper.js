@@ -1,4 +1,5 @@
 define(function (require, exports, module) {
+    const CodeInspection = brackets.getModule("language/CodeInspection");
 
     /**
      * This function is responsible to get the file data from the active editor
@@ -29,7 +30,6 @@ define(function (require, exports, module) {
         }
     }
 
-
     /**
      * This function is responsible to get the required data from the result issues.
      * this is needed because the API provides lots of unnecessary data that we might not need,
@@ -40,7 +40,7 @@ define(function (require, exports, module) {
      */
     function getRequiredDataFromErrors(resultIssues) {
         const errors = [];
-        for(let i = 0; i < resultIssues.length; i++) {
+        for (let i = 0; i < resultIssues.length; i++) {
             errors.push({
                 text: resultIssues[i].text, // the spelling error word {String} ex: hallo
                 textLength: resultIssues[i].length, // the length of the word which has the spelling error {Number} ex: 5
@@ -57,6 +57,29 @@ define(function (require, exports, module) {
         return errors;
     }
 
+    /**
+     * This function is responsible for converting spell check errors to CodeInspection format
+     * @param {Array} errors - array of the error objects. refer to the function above
+     * @returns {Array} - array of error objects which is compatible to codeInspection
+     */
+    function convertErrorsToCodeInspectionFormat(errors) {
+        return errors.map(function (error) {
+            return {
+                pos: {
+                    line: error.lineNumber,
+                    ch: error.lineCharStart
+                },
+                endPos: {
+                    line: error.lineNumber,
+                    ch: error.lineCharEnd
+                },
+                message: `"${error.text}" may be misspelled.${error.suggestion ? ` Did you mean "${error.suggestion}"?` : ""}`,
+                type: CodeInspection.Type.WARNING
+            };
+        });
+    }
+
     exports.getFileData = getFileData;
     exports.getRequiredDataFromErrors = getRequiredDataFromErrors;
+    exports.convertErrorsToCodeInspectionFormat = convertErrorsToCodeInspectionFormat;
 });

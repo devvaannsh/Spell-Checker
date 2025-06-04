@@ -3,9 +3,9 @@ define(function (require, exports, module) {
     const NodeConnector = brackets.getModule("NodeConnector");
 
     const Driver = require("./src/spell-checker-driver");
+    const UI = require("./src/spell-check-ui");
 
     let nodeConnector;
-
 
     /**
      * This function will be called when the app is ready and after the node connector is created
@@ -16,10 +16,8 @@ define(function (require, exports, module) {
             await nodeConnector.execPeer("initCSpell");
             Driver.setNodeConnector(nodeConnector);
 
-            // TODO: Need to remove the setTimeout from here
-            setTimeout(() => {
-                Driver.driver();
-            }, 5000);
+            UI.registerSpellChecker();
+            Driver.driver();
         } catch (error) {
             console.error("Failed to initialize spell checker:", error);
         }
