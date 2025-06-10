@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     const Commands = require("./commands");
     const IgnoreWords = require("./ignoreWords");
     const DictionaryWords = require("./dictionaryWords");
+    const FixTypo = require("./fixTypo");
 
     let subMenu;
 
@@ -17,6 +18,12 @@ define(function (require, exports, module) {
     }
 
     function _addMenuItemsToSubMenu() {
+        // Fix typo
+        CommandManager.register(Strings.FIX_TYPO, Commands.FIX_TYPO, FixTypo.fixCurrentTypo);
+        subMenu.addMenuItem(Commands.FIX_TYPO);
+
+        subMenu.addMenuDivider();
+
         // Ignore Word
         CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, IgnoreWords.addCurrentWordToIgnored);
         subMenu.addMenuItem(Commands.IGNORE_WORD);
@@ -31,11 +38,23 @@ define(function (require, exports, module) {
      * Currently, it enables/disables options based on cursor position
      */
     function _beforeContextMenuOpen() {
+        const fixTypoCommand = CommandManager.get(Commands.FIX_TYPO);
         const ignoreCommand = CommandManager.get(Commands.IGNORE_WORD);
         const dictionaryCommand = CommandManager.get(Commands.ADD_WORD_TO_DICTIONARY);
 
-        if (ignoreCommand && dictionaryCommand) {
-            const isMisspelled = IgnoreWords.isCurrentWordMisspelled();
+        if (fixTypoCommand && ignoreCommand && dictionaryCommand) {
+            const isMisspelled = FixTypo.isCurrentWordMisspelled();
+            const typoInfo = FixTypo.getCurrentTypoInfo();
+
+            // update the fix typo command text dynamically
+            if (typoInfo) {
+                const fixText = `Fix typo: ${typoInfo.word} → ${typoInfo.suggestion}`;
+                fixTypoCommand.setName(fixText);
+            } else {
+                fixTypoCommand.setName(Strings.FIX_TYPO);
+            }
+
+            fixTypoCommand.setEnabled(isMisspelled && typoInfo !== null);
             ignoreCommand.setEnabled(isMisspelled);
             dictionaryCommand.setEnabled(isMisspelled);
         }

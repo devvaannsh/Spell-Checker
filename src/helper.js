@@ -11,7 +11,6 @@ define(function (require, exports, module) {
             // get the document from the editor
             const document = editor.document;
             if (!document) {
-                console.error("No document was found in the editor");
                 return;
             }
 
@@ -123,8 +122,41 @@ define(function (require, exports, module) {
         return null;
     }
 
+    /**
+     * This function fixes the current misspelled word by replacing it with the suggestion
+     * @param {Editor} editor - the editor instance
+     * @param {Array} errors - array of current spell check errors
+     * @returns {boolean} - true if word was fixed, false otherwise
+     */
+    function fixCurrentMisspelledWord(editor, errors) {
+        if (!editor || !errors || errors.length === 0) {
+            return false;
+        }
+
+        const currentMisspelledWord = getCurrentMisspelledWord(editor, errors);
+        if (!currentMisspelledWord || !currentMisspelledWord.error.suggestion) {
+            return false;
+        }
+
+        const error = currentMisspelledWord.error;
+        const document = editor.document;
+
+        try {
+            // Replace the misspelled word with the suggestion
+            document.replaceRange(
+                error.suggestion,
+                { line: error.lineNumber, ch: error.lineCharStart },
+                { line: error.lineNumber, ch: error.lineCharEnd }
+            );
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
     exports.getFileData = getFileData;
     exports.getRequiredDataFromErrors = getRequiredDataFromErrors;
     exports.convertErrorsToCodeInspectionFormat = convertErrorsToCodeInspectionFormat;
     exports.getCurrentMisspelledWord = getCurrentMisspelledWord;
+    exports.fixCurrentMisspelledWord = fixCurrentMisspelledWord;
 });

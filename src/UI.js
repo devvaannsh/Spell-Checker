@@ -62,7 +62,7 @@ define(function (require, exports, module) {
                     scanFile: lintOneFile
                 });
             } catch (error) {
-                console.log("Failed to register SpellChecker for language:", languageId, error.message);
+                // pass
             }
         });
     }
