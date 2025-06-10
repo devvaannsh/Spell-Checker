@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     const Strings = require("./strings");
     const Commands = require("./commands");
     const IgnoreWords = require("./ignoreWords");
+    const DictionaryWords = require("./dictionaryWords");
 
     let subMenu;
 
@@ -19,17 +20,24 @@ define(function (require, exports, module) {
         // Ignore Word
         CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, IgnoreWords.addCurrentWordToIgnored);
         subMenu.addMenuItem(Commands.IGNORE_WORD);
+
+        // Add Word to Dictionary
+        CommandManager.register(Strings.ADD_WORD_TO_DICTIONARY, Commands.ADD_WORD_TO_DICTIONARY, DictionaryWords.addCurrentWordToDictionary);
+        subMenu.addMenuItem(Commands.ADD_WORD_TO_DICTIONARY);
     }
 
     /**
      * This function is called before the context menu is shown
-     * Currently, it enables/disables (only) the ignore word option based on cursor position
+     * Currently, it enables/disables options based on cursor position
      */
     function _beforeContextMenuOpen() {
-        const command = CommandManager.get(Commands.IGNORE_WORD);
-        if (command) {
+        const ignoreCommand = CommandManager.get(Commands.IGNORE_WORD);
+        const dictionaryCommand = CommandManager.get(Commands.ADD_WORD_TO_DICTIONARY);
+
+        if (ignoreCommand && dictionaryCommand) {
             const isMisspelled = IgnoreWords.isCurrentWordMisspelled();
-            command.setEnabled(isMisspelled);
+            ignoreCommand.setEnabled(isMisspelled);
+            dictionaryCommand.setEnabled(isMisspelled);
         }
     }
 

@@ -4,6 +4,7 @@ define(function (require, exports, module) {
     const Helper = require("./helper");
     const UI = require("./UI");
     const IgnoreWords = require("./ignoreWords");
+    const DictionaryWords = require("./dictionaryWords");
 
     let nodeConnector;
 
@@ -28,14 +29,16 @@ define(function (require, exports, module) {
         if (!fileData || !nodeConnector) return;
 
         try {
-            // get ignored words and include them in the API call
+            // get ignored words and dictionary words and include them in the API call
             const ignoreWords = IgnoreWords.getIgnoredWords();
+            const dictionaryWords = DictionaryWords.getDictionaryWords();
 
             // call the API
             const resultIssues = await nodeConnector.execPeer("checkSpelling", {
                 content: fileData.content,
                 filePath: fileData.filePath,
-                ignoreWords: ignoreWords
+                ignoreWords: ignoreWords,
+                dictionaryWords: dictionaryWords
             });
 
             // resultIssues has lot of data that we don't need also some data needs to be calculated as per Phoenix requirements
