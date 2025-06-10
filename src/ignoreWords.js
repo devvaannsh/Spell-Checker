@@ -3,6 +3,8 @@ define(function (require, exports, module) {
 
 	const Helper = require("./helper");
 	const UI = require("./UI");
+    const Driver = require("./driver");
+
 
 	const IGNORED_WORDS = [];
 
@@ -24,6 +26,9 @@ define(function (require, exports, module) {
 
         if (currentMisspelledWord) {
             addToIgnoredWords(currentMisspelledWord.word);
+
+            // trigger spell check immediately to reflect changes
+            Driver.driver();
         }
     }
 
