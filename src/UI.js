@@ -2,7 +2,7 @@ define(function (require, exports, module) {
     const CodeInspection = brackets.getModule("language/CodeInspection");
     const LanguageManager = brackets.getModule("language/LanguageManager");
 
-    const Helper = require("./spell-check-helper");
+    const Helper = require("./helper");
 
     // TODO: this should be moved to Strings.js once we integrate this to core
     const SPELL_CHECKER_NAME = "SpellChecker";

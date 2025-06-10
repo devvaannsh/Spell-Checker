@@ -2,8 +2,8 @@ define(function (require, exports, module) {
     const AppInit = brackets.getModule("utils/AppInit");
     const NodeConnector = brackets.getModule("NodeConnector");
 
-    const Driver = require("./src/spell-checker-driver");
-    const UI = require("./src/spell-check-ui");
+    const Driver = require("./src/driver");
+    const UI = require("./src/UI");
 
     let nodeConnector;
 

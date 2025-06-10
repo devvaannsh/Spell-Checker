@@ -1,8 +1,8 @@
 define(function (require, exports, module) {
     const EditorManager = brackets.getModule("editor/EditorManager");
 
-    const Helper = require("./spell-check-helper");
-    const UI = require("./spell-check-ui");
+    const Helper = require("./helper");
+    const UI = require("./UI");
 
     let nodeConnector;
 
