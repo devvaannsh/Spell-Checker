@@ -67,7 +67,16 @@ define(function (require, exports, module) {
         });
     }
 
+    /**
+     * This function returns the current cached errors
+     * @returns {Array} - array of current spell check errors
+     */
+    function getErrors() {
+        return cachedErrors;
+    }
+
     exports.registerSpellChecker = registerSpellChecker;
     exports.setErrors = setErrors;
     exports.clearErrors = clearErrors;
+    exports.getErrors = getErrors;
 });

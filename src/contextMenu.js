@@ -17,13 +17,29 @@ define(function (require, exports, module) {
 
     function _addMenuItemsToSubMenu() {
         // Ignore Word
-        CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, IgnoreWords.addToIgnoredWords);
+        CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, IgnoreWords.addCurrentWordToIgnored);
         subMenu.addMenuItem(Commands.IGNORE_WORD);
+    }
+
+    /**
+     * This function is called before the context menu is shown
+     * Currently, it enables/disables (only) the ignore word option based on cursor position
+     */
+    function _beforeContextMenuOpen() {
+        const command = CommandManager.get(Commands.IGNORE_WORD);
+        if (command) {
+            const isMisspelled = IgnoreWords.isCurrentWordMisspelled();
+            command.setEnabled(isMisspelled);
+        }
     }
 
     function init() {
         _addSubMenuToEditorMenu();
         _addMenuItemsToSubMenu();
+
+        // register the before open handler to enable/disable menu items
+        const editorContextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
+        editorContextMenu.on("beforeContextMenuOpen", _beforeContextMenuOpen);
     }
 
     exports.init = init;

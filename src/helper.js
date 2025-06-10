@@ -92,7 +92,39 @@ define(function (require, exports, module) {
         });
     }
 
+    /**
+     * This function gets the word at the current cursor position and checks if it's misspelled
+     * @param {Editor} editor - the editor instance
+     * @param {Array} errors - array of current spell check errors
+     * @returns {Object|null} - object with word and error info if misspelled, null otherwise
+     */
+    function getCurrentMisspelledWord(editor, errors) {
+        if (!editor || !errors || errors.length === 0) {
+            return null;
+        }
+
+        const cursor = editor.getCursorPos();
+        const line = cursor.line;
+        const ch = cursor.ch;
+
+        // find if cursor is within any misspelled word
+        for (let i = 0; i < errors.length; i++) {
+            const error = errors[i];
+            if (error.lineNumber === line &&
+                ch >= error.lineCharStart &&
+                ch <= error.lineCharEnd) {
+                return {
+                    word: error.text,
+                    error: error
+                };
+            }
+        }
+
+        return null;
+    }
+
     exports.getFileData = getFileData;
     exports.getRequiredDataFromErrors = getRequiredDataFromErrors;
     exports.convertErrorsToCodeInspectionFormat = convertErrorsToCodeInspectionFormat;
+    exports.getCurrentMisspelledWord = getCurrentMisspelledWord;
 });
