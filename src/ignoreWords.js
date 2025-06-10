@@ -4,12 +4,10 @@ define(function (require, exports, module) {
 	const Helper = require("./helper");
 	const UI = require("./UI");
     const Driver = require("./driver");
-
-
-	const IGNORED_WORDS = [];
+    const Preferences = require("./preferences");
 
     function addToIgnoredWords(word) {
-        IGNORED_WORDS.push(word);
+        Preferences.addToIgnoredWords(word);
     }
 
     /**
@@ -49,7 +47,7 @@ define(function (require, exports, module) {
     }
 
     function getIgnoredWords() {
-    	return IGNORED_WORDS;
+    	return Preferences.getIgnoredWords();
     }
 
     exports.addToIgnoredWords = addToIgnoredWords;

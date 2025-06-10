@@ -4,11 +4,10 @@ define(function (require, exports, module) {
     const Helper = require("./helper");
     const UI = require("./UI");
     const Driver = require("./driver");
-
-	const DICTIONARY_WORDS = [];
+    const Preferences = require("./preferences");
 
     function addToDictionaryWords(word) {
-        DICTIONARY_WORDS.push(word);
+        Preferences.addToDictionaryWords(word);
     }
 
     /**
@@ -48,7 +47,7 @@ define(function (require, exports, module) {
     }
 
     function getDictionaryWords() {
-    	return DICTIONARY_WORDS;
+    	return Preferences.getDictionaryWords();
     }
 
     exports.addToDictionaryWords = addToDictionaryWords;
