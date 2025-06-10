@@ -2,25 +2,45 @@ define(function (require, exports, module) {
     const PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 
     const PREFS_KEY = "spell-checker";
-    const DEFAULT_IGNORED_WORDS = [];
-    const DEFAULT_DICTIONARY_WORDS = [];
 
     const prefs = PreferencesManager.getExtensionPrefs(PREFS_KEY);
 
-    // preference keys
-    const PREF_IGNORED_WORDS = "ignoredWords";
-    const PREF_DICTIONARY_WORDS = "dictionaryWords";
+    // all spell checker settings will come inside this
+    const PREF_SPELL_CHECKER = "spellChecker";
 
-    // default values
-    prefs.definePreference(PREF_IGNORED_WORDS, "array", DEFAULT_IGNORED_WORDS);
-    prefs.definePreference(PREF_DICTIONARY_WORDS, "array", DEFAULT_DICTIONARY_WORDS);
+    // default spell checker settings object
+    const DEFAULT_SPELL_CHECKER_SETTINGS = {
+        ignoredWords: [],
+        dictionaryWords: []
+    };
+
+    // the single spellChecker preference object
+    prefs.definePreference(PREF_SPELL_CHECKER, "object", DEFAULT_SPELL_CHECKER_SETTINGS);
+
+    /**
+     * Get the current spell checker settings object
+     * @returns {Object} - spell checker settings object
+     */
+    function getSpellCheckerSettings() {
+        return prefs.get(PREF_SPELL_CHECKER) || DEFAULT_SPELL_CHECKER_SETTINGS;
+    }
+
+    /**
+     * Save the spell checker settings object
+     * @param {Object} settings - the settings object to save
+     */
+    function saveSpellCheckerSettings(settings) {
+        prefs.set(PREF_SPELL_CHECKER, settings);
+        prefs.save();
+    }
 
     /**
      * Get ignored words from preferences
      * @returns {Array} - array of ignored words
      */
     function getIgnoredWords() {
-        return prefs.get(PREF_IGNORED_WORDS) || [];
+        const settings = getSpellCheckerSettings();
+        return settings.ignoredWords || [];
     }
 
     /**
@@ -28,7 +48,8 @@ define(function (require, exports, module) {
      * @returns {Array} - array of dictionary words
      */
     function getDictionaryWords() {
-        return prefs.get(PREF_DICTIONARY_WORDS) || [];
+        const settings = getSpellCheckerSettings();
+        return settings.dictionaryWords || [];
     }
 
     /**
@@ -40,11 +61,10 @@ define(function (require, exports, module) {
             return;
         }
 
-        const ignoredWords = getIgnoredWords();
-        if (ignoredWords.indexOf(word) === -1) {
-            ignoredWords.push(word);
-            prefs.set(PREF_IGNORED_WORDS, ignoredWords);
-            prefs.save();
+        const settings = getSpellCheckerSettings();
+        if (settings.ignoredWords.indexOf(word) === -1) {
+            settings.ignoredWords.push(word);
+            saveSpellCheckerSettings(settings);
         }
     }
 
@@ -57,11 +77,10 @@ define(function (require, exports, module) {
             return;
         }
 
-        const dictionaryWords = getDictionaryWords();
-        if (dictionaryWords.indexOf(word) === -1) {
-            dictionaryWords.push(word);
-            prefs.set(PREF_DICTIONARY_WORDS, dictionaryWords);
-            prefs.save();
+        const settings = getSpellCheckerSettings();
+        if (settings.dictionaryWords.indexOf(word) === -1) {
+            settings.dictionaryWords.push(word);
+            saveSpellCheckerSettings(settings);
         }
     }
 
