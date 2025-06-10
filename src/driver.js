@@ -3,6 +3,7 @@ define(function (require, exports, module) {
 
     const Helper = require("./helper");
     const UI = require("./UI");
+    const IgnoreWords = require("./ignoreWords");
 
     let nodeConnector;
 
@@ -27,10 +28,14 @@ define(function (require, exports, module) {
         if (!fileData || !nodeConnector) return;
 
         try {
+            // get ignored words and include them in the API call
+            const ignoreWords = IgnoreWords.getIgnoredWords();
+
             // call the API
             const resultIssues = await nodeConnector.execPeer("checkSpelling", {
                 content: fileData.content,
-                filePath: fileData.filePath
+                filePath: fileData.filePath,
+                ignoreWords: ignoreWords
             });
 
             // resultIssues has lot of data that we don't need also some data needs to be calculated as per Phoenix requirements
