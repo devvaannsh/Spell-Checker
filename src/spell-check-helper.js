@@ -59,12 +59,12 @@ define(function (require, exports, module) {
 
     /**
      * This function is responsible for converting spell check errors to CodeInspection format
-     * @param {Array} errors - array of the error objects. refer to the function above
+     * @param {Array} errors - array of the error objects. refer to the function above (getRequiredDataFromErrors)
      * @returns {Array} - array of error objects which is compatible to codeInspection
      */
     function convertErrorsToCodeInspectionFormat(errors) {
         return errors.map(function (error) {
-            return {
+            const errorObj = {
                 pos: {
                     line: error.lineNumber,
                     ch: error.lineCharStart
@@ -76,6 +76,19 @@ define(function (require, exports, module) {
                 message: `"${error.text}" may be misspelled.${error.suggestion ? ` Did you mean "${error.suggestion}"?` : ""}`,
                 type: CodeInspection.Type.WARNING
             };
+
+            // add fix if there's a valid suggestion
+            if (error.suggestion && error.suggestion.trim() !== "") {
+                errorObj.fix = {
+                    replaceText: error.suggestion,
+                    rangeOffset: {
+                        start: error.documentOffset,
+                        end: error.documentOffset + error.textLength
+                    }
+                };
+            }
+
+            return errorObj;
         });
     }
 
