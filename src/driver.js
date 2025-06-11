@@ -50,12 +50,16 @@ define(function (require, exports, module) {
             const fileIgnoredWords = Preferences.getFileIgnoredWords(fileData.filePath);
             const combinedIgnoreWords = ignoreWords.concat(fileIgnoredWords);
 
+            // Get file-specific dictionary words and combine with global dictionary words
+            const fileDictionaryWords = Preferences.getFileDictionaryWords(fileData.filePath);
+            const combinedDictionaryWords = dictionaryWords.concat(fileDictionaryWords);
+
             // call the API
             const resultIssues = await nodeConnector.execPeer("checkSpelling", {
                 content: fileData.content,
                 filePath: fileData.filePath,
                 ignoreWords: combinedIgnoreWords,
-                dictionaryWords: dictionaryWords
+                dictionaryWords: combinedDictionaryWords
             });
 
             // resultIssues has lot of data that we don't need also some data needs to be calculated as per Phoenix requirements

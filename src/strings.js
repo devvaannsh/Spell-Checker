@@ -8,6 +8,8 @@ define(function (require, exports, module) {
     const REMOVE_WORD_FROM_DICTIONARY = "Remove Word from Dictionary";
     const IGNORE_ALL_WORDS_IN_FILE = "Ignore All Misspelled Words in File";
     const UNIGNORE_ALL_WORDS_IN_FILE = "Unignore All Words for File";
+    const ADD_ALL_WORDS_TO_DICTIONARY = "Add All Misspelled Words to Dictionary";
+    const REMOVE_ALL_WORDS_FROM_DICTIONARY = "Remove All Words from Dictionary for File";
     const TOGGLE_SPELL_CHECKER = "Toggle Spell Checker";
     const DISABLE_SPELL_CHECKER = "Disable Spell Checker";
     const ENABLE_SPELL_CHECKER = "Enable Spell Checker";
@@ -24,6 +26,8 @@ define(function (require, exports, module) {
     exports.REMOVE_WORD_FROM_DICTIONARY = REMOVE_WORD_FROM_DICTIONARY;
     exports.IGNORE_ALL_WORDS_IN_FILE = IGNORE_ALL_WORDS_IN_FILE;
     exports.UNIGNORE_ALL_WORDS_IN_FILE = UNIGNORE_ALL_WORDS_IN_FILE;
+    exports.ADD_ALL_WORDS_TO_DICTIONARY = ADD_ALL_WORDS_TO_DICTIONARY;
+    exports.REMOVE_ALL_WORDS_FROM_DICTIONARY = REMOVE_ALL_WORDS_FROM_DICTIONARY;
     exports.TOGGLE_SPELL_CHECKER = TOGGLE_SPELL_CHECKER;
     exports.DISABLE_SPELL_CHECKER = DISABLE_SPELL_CHECKER;
     exports.ENABLE_SPELL_CHECKER = ENABLE_SPELL_CHECKER;

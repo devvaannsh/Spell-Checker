@@ -81,6 +81,44 @@ define(function (require, exports, module) {
         Driver.driver();
     }
 
+    /**
+     * Toggle add/remove all misspelled words to/from dictionary for the current file
+     */
+    function toggleAddAllWordsToDictionary() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) return;
+
+        const fileData = Helper.getFileData(editor);
+        if (!fileData) return;
+
+        const hasDictionaryWords = Preferences.hasFileDictionaryWords(fileData.filePath);
+
+        if (hasDictionaryWords) {
+            // Remove all dictionary words for this file
+            Preferences.removeAllFileDictionaryWords(fileData.filePath);
+        } else {
+            // Get all current misspelled words in the file and add them to dictionary
+            const currentErrors = UI.getErrors();
+
+            if (currentErrors && currentErrors.length > 0) {
+                // Extract unique misspelled words from current errors
+                const misspelledWords = [];
+                currentErrors.forEach(function (error) {
+                    if (error.text && misspelledWords.indexOf(error.text) === -1) {
+                        misspelledWords.push(error.text);
+                    }
+                });
+
+                if (misspelledWords.length > 0) {
+                    Preferences.addWordsToFileDictionary(fileData.filePath, misspelledWords);
+                }
+            }
+        }
+
+        // Re-run driver to apply changes immediately
+        Driver.driver();
+    }
+
     function _addSubMenuToEditorMenu() {
         subMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addSubMenu(
             Strings.SPELL_CHECKER_SUBMENU_NAME,
@@ -114,14 +152,6 @@ define(function (require, exports, module) {
         });
         subMenu.addMenuItem(Commands.IGNORE_WORD);
 
-        // Ignore/Unignore All Words in File
-        CommandManager.register(
-            Strings.IGNORE_ALL_WORDS_IN_FILE,
-            Commands.IGNORE_ALL_WORDS_IN_FILE,
-            toggleIgnoreAllWordsInFile
-        );
-        subMenu.addMenuItem(Commands.IGNORE_ALL_WORDS_IN_FILE);
-
         // Add Word to Dictionary (will dynamically change to Remove Word from Dictionary)
         CommandManager.register(Strings.ADD_WORD_TO_DICTIONARY, Commands.ADD_WORD_TO_DICTIONARY, function () {
             const isWordInDictionary = DictionaryWords.isCurrentWordInDictionary();
@@ -132,6 +162,24 @@ define(function (require, exports, module) {
             }
         });
         subMenu.addMenuItem(Commands.ADD_WORD_TO_DICTIONARY);
+
+        subMenu.addMenuDivider();
+
+        // Ignore/Unignore All Words in File
+        CommandManager.register(
+            Strings.IGNORE_ALL_WORDS_IN_FILE,
+            Commands.IGNORE_ALL_WORDS_IN_FILE,
+            toggleIgnoreAllWordsInFile
+        );
+        subMenu.addMenuItem(Commands.IGNORE_ALL_WORDS_IN_FILE);
+
+        // Add/Remove All Words to/from Dictionary for File
+        CommandManager.register(
+            Strings.ADD_ALL_WORDS_TO_DICTIONARY,
+            Commands.ADD_ALL_WORDS_TO_DICTIONARY,
+            toggleAddAllWordsToDictionary
+        );
+        subMenu.addMenuItem(Commands.ADD_ALL_WORDS_TO_DICTIONARY);
 
         subMenu.addMenuDivider();
 
@@ -158,6 +206,7 @@ define(function (require, exports, module) {
         const ignoreCommand = CommandManager.get(Commands.IGNORE_WORD);
         const dictionaryCommand = CommandManager.get(Commands.ADD_WORD_TO_DICTIONARY);
         const ignoreAllCommand = CommandManager.get(Commands.IGNORE_ALL_WORDS_IN_FILE);
+        const addAllToDictionaryCommand = CommandManager.get(Commands.ADD_ALL_WORDS_TO_DICTIONARY);
         const toggleCommand = CommandManager.get(Commands.TOGGLE_SPELL_CHECKER);
         const toggleFileCommand = CommandManager.get(Commands.TOGGLE_SPELL_CHECKER_FILE);
 
@@ -186,7 +235,7 @@ define(function (require, exports, module) {
             toggleFileCommand.setName(toggleFileText);
         }
 
-        if (fixTypoCommand && fixAllTyposCommand && ignoreCommand && dictionaryCommand && ignoreAllCommand) {
+        if (fixTypoCommand && fixAllTyposCommand && ignoreCommand && dictionaryCommand && ignoreAllCommand && addAllToDictionaryCommand) {
             const isMisspelled = FixTypo.isCurrentWordMisspelled();
             const typoInfo = FixTypo.getCurrentTypoInfo();
             const hasFixableTypos = FixTypo.hasFixableTyposInFile();
@@ -240,7 +289,6 @@ define(function (require, exports, module) {
                 }
 
                 // Check if there are current spelling errors to ignore
-                const UI = require("./UI");
                 const currentErrors = UI.getErrors();
                 hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
@@ -254,6 +302,35 @@ define(function (require, exports, module) {
                 // 2. There are already ignored words for this file to unignore
                 const enableIgnoreAllCommand = spellCheckEnabled && (hasCurrentErrors || hasFileIgnoredWords);
                 ignoreAllCommand.setEnabled(enableIgnoreAllCommand);
+            }
+
+            // Update add all to dictionary command text based on file's dictionary words status
+            if (addAllToDictionaryCommand) {
+                const editor = EditorManager.getActiveEditor();
+                let hasFileDictionaryWords = false;
+                let hasCurrentErrors = false;
+
+                if (editor) {
+                    const fileData = Helper.getFileData(editor);
+                    if (fileData) {
+                        hasFileDictionaryWords = Preferences.hasFileDictionaryWords(fileData.filePath);
+                    }
+                }
+
+                // Check if there are current spelling errors to add to dictionary
+                const currentErrors = UI.getErrors();
+                hasCurrentErrors = currentErrors && currentErrors.length > 0;
+
+                const addAllToDictionaryText = hasFileDictionaryWords
+                    ? Strings.REMOVE_ALL_WORDS_FROM_DICTIONARY
+                    : Strings.ADD_ALL_WORDS_TO_DICTIONARY;
+                addAllToDictionaryCommand.setName(addAllToDictionaryText);
+
+                // Enable the command if spell checker is enabled for this file and either:
+                // 1. There are current errors to add to dictionary, OR
+                // 2. There are already dictionary words for this file to remove
+                const enableAddAllToDictionaryCommand = spellCheckEnabled && (hasCurrentErrors || hasFileDictionaryWords);
+                addAllToDictionaryCommand.setEnabled(enableAddAllToDictionaryCommand);
             }
 
             // update the fix typo command text dynamically
