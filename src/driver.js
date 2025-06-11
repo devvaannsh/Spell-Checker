@@ -46,11 +46,15 @@ define(function (require, exports, module) {
             const ignoreWords = IgnoreWords.getIgnoredWords();
             const dictionaryWords = DictionaryWords.getDictionaryWords();
 
+            // Get file-specific ignored words and combine with global ignored words
+            const fileIgnoredWords = Preferences.getFileIgnoredWords(fileData.filePath);
+            const combinedIgnoreWords = ignoreWords.concat(fileIgnoredWords);
+
             // call the API
             const resultIssues = await nodeConnector.execPeer("checkSpelling", {
                 content: fileData.content,
                 filePath: fileData.filePath,
-                ignoreWords: ignoreWords,
+                ignoreWords: combinedIgnoreWords,
                 dictionaryWords: dictionaryWords
             });
 
