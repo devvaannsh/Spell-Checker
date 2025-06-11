@@ -54,6 +54,10 @@ define(function (require, exports, module) {
         CommandManager.register(Strings.FIX_TYPO, Commands.FIX_TYPO, FixTypo.fixCurrentTypo);
         subMenu.addMenuItem(Commands.FIX_TYPO);
 
+        // Fix all typos in file
+        CommandManager.register(Strings.FIX_ALL_TYPOS_IN_FILE, Commands.FIX_ALL_TYPOS_IN_FILE, FixTypo.fixAllTyposInFile);
+        subMenu.addMenuItem(Commands.FIX_ALL_TYPOS_IN_FILE);
+
         subMenu.addMenuDivider();
 
         // Ignore Word
@@ -85,6 +89,7 @@ define(function (require, exports, module) {
      */
     function _beforeContextMenuOpen() {
         const fixTypoCommand = CommandManager.get(Commands.FIX_TYPO);
+        const fixAllTyposCommand = CommandManager.get(Commands.FIX_ALL_TYPOS_IN_FILE);
         const ignoreCommand = CommandManager.get(Commands.IGNORE_WORD);
         const dictionaryCommand = CommandManager.get(Commands.ADD_WORD_TO_DICTIONARY);
         const toggleCommand = CommandManager.get(Commands.TOGGLE_SPELL_CHECKER);
@@ -113,9 +118,10 @@ define(function (require, exports, module) {
             toggleFileCommand.setName(toggleFileText);
         }
 
-        if (fixTypoCommand && ignoreCommand && dictionaryCommand) {
+        if (fixTypoCommand && fixAllTyposCommand && ignoreCommand && dictionaryCommand) {
             const isMisspelled = FixTypo.isCurrentWordMisspelled();
             const typoInfo = FixTypo.getCurrentTypoInfo();
+            const hasFixableTypos = FixTypo.hasFixableTyposInFile();
             const isSpellCheckerEnabled = !Preferences.isSpellCheckerDisabled();
 
             // Check if spell checker is enabled for the current file
@@ -139,6 +145,7 @@ define(function (require, exports, module) {
             // Disable spell check related commands if spell checker is disabled globally or for this file
             const spellCheckEnabled = isSpellCheckerEnabled && isFileSpellCheckerEnabled;
             fixTypoCommand.setEnabled(isMisspelled && typoInfo !== null && spellCheckEnabled);
+            fixAllTyposCommand.setEnabled(hasFixableTypos && spellCheckEnabled);
             ignoreCommand.setEnabled(isMisspelled && spellCheckEnabled);
             dictionaryCommand.setEnabled(isMisspelled && spellCheckEnabled);
         }

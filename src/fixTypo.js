@@ -24,6 +24,55 @@ define(function (require, exports, module) {
     }
 
     /**
+     * This function fixes all misspelled words in the current file
+     */
+    function fixAllTyposInFile() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return;
+        }
+
+        const errors = UI.getErrors();
+        if (!errors || errors.length === 0) {
+            return;
+        }
+
+        const document = editor.document;
+        let fixedCount = 0;
+
+        try {
+            // Sort errors by document offset in descending order
+            // This ensures we fix from end to beginning, so offsets remain valid
+            const sortedErrors = errors.slice().sort((a, b) => b.documentOffset - a.documentOffset);
+
+            // Fix each error that has a suggestion
+            for (let i = 0; i < sortedErrors.length; i++) {
+                const error = sortedErrors[i];
+                if (error.suggestion && error.suggestion.trim() !== "") {
+                    try {
+                        // Replace the misspelled word with the suggestion
+                        document.replaceRange(
+                            error.suggestion,
+                            { line: error.lineNumber, ch: error.lineCharStart },
+                            { line: error.lineNumber, ch: error.lineCharEnd }
+                        );
+                        fixedCount++;
+                    } catch (err) {
+                        console.warn("Failed to fix typo:", error.text, err);
+                    }
+                }
+            }
+
+            if (fixedCount > 0) {
+                // trigger spell check immediately to reflect changes
+                Driver.driver();
+            }
+        } catch (error) {
+            console.error("Failed to fix all typos:", error);
+        }
+    }
+
+    /**
      * This function checks if there's a misspelled word at the current cursor position
      * @returns {boolean} - true if there's a misspelled word at cursor, false otherwise
      */
@@ -62,7 +111,29 @@ define(function (require, exports, module) {
         return null;
     }
 
+    /**
+     * Check if there are any typos in the file that can be fixed
+     * @returns {boolean} - true if there are fixable typos in the file
+     */
+    function hasFixableTyposInFile() {
+        const errors = UI.getErrors();
+        if (!errors || errors.length === 0) {
+            return false;
+        }
+
+        // Check if any error has a suggestion
+        for (let i = 0; i < errors.length; i++) {
+            if (errors[i].suggestion && errors[i].suggestion.trim() !== "") {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     exports.fixCurrentTypo = fixCurrentTypo;
+    exports.fixAllTyposInFile = fixAllTyposInFile;
     exports.isCurrentWordMisspelled = isCurrentWordMisspelled;
     exports.getCurrentTypoInfo = getCurrentTypoInfo;
+    exports.hasFixableTyposInFile = hasFixableTyposInFile;
 });
