@@ -3,6 +3,7 @@ define(function (require, exports, module) {
     const LanguageManager = brackets.getModule("language/LanguageManager");
 
     const Helper = require("./helper");
+    const Preferences = require("./preferences");
 
     // TODO: this should be moved to Strings.js once we integrate this to core
     const SPELL_CHECKER_NAME = "SpellChecker";
@@ -22,6 +23,11 @@ define(function (require, exports, module) {
      * @returns {Object|null} - results object with errors array or null
      */
     function lintOneFile(text, fullPath) {
+        // Check if spell checker is disabled
+        if (Preferences.isSpellCheckerDisabled()) {
+            return null;
+        }
+
         if (cachedErrors.length > 0) {
             const codeInspectionErrors = Helper.convertErrorsToCodeInspectionFormat(cachedErrors);
             return { errors: codeInspectionErrors };

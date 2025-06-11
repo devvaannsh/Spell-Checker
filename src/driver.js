@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     const UI = require("./UI");
     const IgnoreWords = require("./ignoreWords");
     const DictionaryWords = require("./dictionaryWords");
+    const Preferences = require("./preferences");
 
     let nodeConnector;
 
@@ -22,6 +23,12 @@ define(function (require, exports, module) {
      * This is just called inside the main.js init function
      */
     async function driver() {
+        // Check if spell checker is disabled
+        if (Preferences.isSpellCheckerDisabled()) {
+            UI.clearErrors();
+            return;
+        }
+
         const editor = EditorManager.getActiveEditor();
         if (!editor) return;
 

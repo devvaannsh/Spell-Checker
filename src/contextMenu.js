@@ -7,8 +7,21 @@ define(function (require, exports, module) {
     const IgnoreWords = require("./ignoreWords");
     const DictionaryWords = require("./dictionaryWords");
     const FixTypo = require("./fixTypo");
+    const Preferences = require("./preferences");
+    const Driver = require("./driver");
 
     let subMenu;
+
+    /**
+     * Toggle spell checker enabled/disabled state
+     */
+    function toggleSpellChecker() {
+        const currentlyDisabled = Preferences.isSpellCheckerDisabled();
+        Preferences.setSpellCheckerDisabled(!currentlyDisabled);
+
+        // Re-run driver to apply changes immediately
+        Driver.driver();
+    }
 
     function _addSubMenuToEditorMenu() {
         subMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addSubMenu(
@@ -29,8 +42,18 @@ define(function (require, exports, module) {
         subMenu.addMenuItem(Commands.IGNORE_WORD);
 
         // Add Word to Dictionary
-        CommandManager.register(Strings.ADD_WORD_TO_DICTIONARY, Commands.ADD_WORD_TO_DICTIONARY, DictionaryWords.addCurrentWordToDictionary);
+        CommandManager.register(
+            Strings.ADD_WORD_TO_DICTIONARY,
+            Commands.ADD_WORD_TO_DICTIONARY,
+            DictionaryWords.addCurrentWordToDictionary
+        );
         subMenu.addMenuItem(Commands.ADD_WORD_TO_DICTIONARY);
+
+        subMenu.addMenuDivider();
+
+        // Toggle Spell Checker
+        CommandManager.register(Strings.TOGGLE_SPELL_CHECKER, Commands.TOGGLE_SPELL_CHECKER, toggleSpellChecker);
+        subMenu.addMenuItem(Commands.TOGGLE_SPELL_CHECKER);
     }
 
     /**
@@ -41,10 +64,19 @@ define(function (require, exports, module) {
         const fixTypoCommand = CommandManager.get(Commands.FIX_TYPO);
         const ignoreCommand = CommandManager.get(Commands.IGNORE_WORD);
         const dictionaryCommand = CommandManager.get(Commands.ADD_WORD_TO_DICTIONARY);
+        const toggleCommand = CommandManager.get(Commands.TOGGLE_SPELL_CHECKER);
+
+        // Update toggle command text based on current state
+        if (toggleCommand) {
+            const isDisabled = Preferences.isSpellCheckerDisabled();
+            const toggleText = isDisabled ? Strings.ENABLE_SPELL_CHECKER : Strings.DISABLE_SPELL_CHECKER;
+            toggleCommand.setName(toggleText);
+        }
 
         if (fixTypoCommand && ignoreCommand && dictionaryCommand) {
             const isMisspelled = FixTypo.isCurrentWordMisspelled();
             const typoInfo = FixTypo.getCurrentTypoInfo();
+            const isSpellCheckerEnabled = !Preferences.isSpellCheckerDisabled();
 
             // update the fix typo command text dynamically
             if (typoInfo) {
@@ -54,9 +86,10 @@ define(function (require, exports, module) {
                 fixTypoCommand.setName(Strings.FIX_TYPO);
             }
 
-            fixTypoCommand.setEnabled(isMisspelled && typoInfo !== null);
-            ignoreCommand.setEnabled(isMisspelled);
-            dictionaryCommand.setEnabled(isMisspelled);
+            // Disable spell check related commands if spell checker is disabled
+            fixTypoCommand.setEnabled(isMisspelled && typoInfo !== null && isSpellCheckerEnabled);
+            ignoreCommand.setEnabled(isMisspelled && isSpellCheckerEnabled);
+            dictionaryCommand.setEnabled(isMisspelled && isSpellCheckerEnabled);
         }
     }
 

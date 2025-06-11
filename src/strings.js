@@ -3,9 +3,15 @@ define(function (require, exports, module) {
     const FIX_TYPO = "Fix Typo";
     const IGNORE_WORD = "Ignore Word";
     const ADD_WORD_TO_DICTIONARY = "Add Word to Dictionary";
+    const TOGGLE_SPELL_CHECKER = "Toggle Spell Checker";
+    const DISABLE_SPELL_CHECKER = "Disable Spell Checker";
+    const ENABLE_SPELL_CHECKER = "Enable Spell Checker";
 
     exports.SPELL_CHECKER_SUBMENU_NAME = SPELL_CHECKER_SUBMENU_NAME;
     exports.FIX_TYPO = FIX_TYPO;
     exports.IGNORE_WORD = IGNORE_WORD;
     exports.ADD_WORD_TO_DICTIONARY = ADD_WORD_TO_DICTIONARY;
+    exports.TOGGLE_SPELL_CHECKER = TOGGLE_SPELL_CHECKER;
+    exports.DISABLE_SPELL_CHECKER = DISABLE_SPELL_CHECKER;
+    exports.ENABLE_SPELL_CHECKER = ENABLE_SPELL_CHECKER;
 });

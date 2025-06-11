@@ -11,7 +11,8 @@ define(function (require, exports, module) {
     // default spell checker settings object
     const DEFAULT_SPELL_CHECKER_SETTINGS = {
         ignoredWords: [],
-        dictionaryWords: []
+        dictionaryWords: [],
+        disabled: false
     };
 
     // the single spellChecker preference object
@@ -84,8 +85,29 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * Check if spell checker is disabled
+     * @returns {boolean} - true if spell checker is disabled
+     */
+    function isSpellCheckerDisabled() {
+        const settings = getSpellCheckerSettings();
+        return settings.disabled === true;
+    }
+
+    /**
+     * Set spell checker disabled state
+     * @param {boolean} disabled - true to disable spell checker, false to enable
+     */
+    function setSpellCheckerDisabled(disabled) {
+        const settings = getSpellCheckerSettings();
+        settings.disabled = disabled === true;
+        saveSpellCheckerSettings(settings);
+    }
+
     exports.getIgnoredWords = getIgnoredWords;
     exports.getDictionaryWords = getDictionaryWords;
     exports.addToIgnoredWords = addToIgnoredWords;
     exports.addToDictionaryWords = addToDictionaryWords;
+    exports.isSpellCheckerDisabled = isSpellCheckerDisabled;
+    exports.setSpellCheckerDisabled = setSpellCheckerDisabled;
 });
