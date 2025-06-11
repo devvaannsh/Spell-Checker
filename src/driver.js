@@ -23,7 +23,7 @@ define(function (require, exports, module) {
      * This is just called inside the main.js init function
      */
     async function driver() {
-        // Check if spell checker is disabled
+        // Check if spell checker is disabled globally
         if (Preferences.isSpellCheckerDisabled()) {
             UI.clearErrors();
             return;
@@ -34,6 +34,12 @@ define(function (require, exports, module) {
 
         const fileData = Helper.getFileData(editor);
         if (!fileData || !nodeConnector) return;
+
+        // Check if spell checker is disabled for this specific file
+        if (Preferences.isSpellCheckerDisabledForFile(fileData.filePath)) {
+            UI.clearErrors();
+            return;
+        }
 
         try {
             // get ignored words and dictionary words and include them in the API call

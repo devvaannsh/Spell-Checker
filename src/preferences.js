@@ -12,7 +12,8 @@ define(function (require, exports, module) {
     const DEFAULT_SPELL_CHECKER_SETTINGS = {
         ignoredWords: [],
         dictionaryWords: [],
-        disabled: false
+        disabled: false,
+        disabledFiles: []
     };
 
     // the single spellChecker preference object
@@ -104,10 +105,51 @@ define(function (require, exports, module) {
         saveSpellCheckerSettings(settings);
     }
 
+    /**
+     * Check if spell checker is disabled for a specific file
+     * @param {string} filePath - the file path to check
+     * @returns {boolean} - true if spell checker is disabled for this file
+     */
+    function isSpellCheckerDisabledForFile(filePath) {
+        if (!filePath) return false;
+
+        const settings = getSpellCheckerSettings();
+        const disabledFiles = settings.disabledFiles || [];
+        return disabledFiles.indexOf(filePath) !== -1;
+    }
+
+    /**
+     * Set spell checker disabled state for a specific file
+     * @param {string} filePath - the file path
+     * @param {boolean} disabled - true to disable spell checker for this file, false to enable
+     */
+    function setSpellCheckerDisabledForFile(filePath, disabled) {
+        if (!filePath) return;
+
+        const settings = getSpellCheckerSettings();
+        if (!settings.disabledFiles) {
+            settings.disabledFiles = [];
+        }
+
+        const fileIndex = settings.disabledFiles.indexOf(filePath);
+
+        if (disabled && fileIndex === -1) {
+            // Add file to disabled list
+            settings.disabledFiles.push(filePath);
+            saveSpellCheckerSettings(settings);
+        } else if (!disabled && fileIndex !== -1) {
+            // Remove file from disabled list
+            settings.disabledFiles.splice(fileIndex, 1);
+            saveSpellCheckerSettings(settings);
+        }
+    }
+
     exports.getIgnoredWords = getIgnoredWords;
     exports.getDictionaryWords = getDictionaryWords;
     exports.addToIgnoredWords = addToIgnoredWords;
     exports.addToDictionaryWords = addToDictionaryWords;
     exports.isSpellCheckerDisabled = isSpellCheckerDisabled;
     exports.setSpellCheckerDisabled = setSpellCheckerDisabled;
+    exports.isSpellCheckerDisabledForFile = isSpellCheckerDisabledForFile;
+    exports.setSpellCheckerDisabledForFile = setSpellCheckerDisabledForFile;
 });

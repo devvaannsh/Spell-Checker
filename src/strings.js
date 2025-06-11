@@ -6,6 +6,9 @@ define(function (require, exports, module) {
     const TOGGLE_SPELL_CHECKER = "Toggle Spell Checker";
     const DISABLE_SPELL_CHECKER = "Disable Spell Checker";
     const ENABLE_SPELL_CHECKER = "Enable Spell Checker";
+    const TOGGLE_SPELL_CHECKER_FILE = "Toggle Spell Checker for this File";
+    const DISABLE_SPELL_CHECKER_FILE = "Disable Spell Checker for this File";
+    const ENABLE_SPELL_CHECKER_FILE = "Enable Spell Checker for this File";
 
     exports.SPELL_CHECKER_SUBMENU_NAME = SPELL_CHECKER_SUBMENU_NAME;
     exports.FIX_TYPO = FIX_TYPO;
@@ -14,4 +17,7 @@ define(function (require, exports, module) {
     exports.TOGGLE_SPELL_CHECKER = TOGGLE_SPELL_CHECKER;
     exports.DISABLE_SPELL_CHECKER = DISABLE_SPELL_CHECKER;
     exports.ENABLE_SPELL_CHECKER = ENABLE_SPELL_CHECKER;
+    exports.TOGGLE_SPELL_CHECKER_FILE = TOGGLE_SPELL_CHECKER_FILE;
+    exports.DISABLE_SPELL_CHECKER_FILE = DISABLE_SPELL_CHECKER_FILE;
+    exports.ENABLE_SPELL_CHECKER_FILE = ENABLE_SPELL_CHECKER_FILE;
 });
