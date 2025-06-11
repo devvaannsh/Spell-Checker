@@ -87,6 +87,68 @@ define(function (require, exports, module) {
     }
 
     /**
+     * Remove a word from ignored words list
+     * @param {string} word - the word to remove from ignored words
+     */
+    function removeFromIgnoredWords(word) {
+        if (!word || typeof word !== "string") {
+            return;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const wordIndex = settings.ignoredWords.indexOf(word);
+        if (wordIndex !== -1) {
+            settings.ignoredWords.splice(wordIndex, 1);
+            saveSpellCheckerSettings(settings);
+        }
+    }
+
+    /**
+     * Remove a word from dictionary words list
+     * @param {string} word - the word to remove from dictionary
+     */
+    function removeFromDictionaryWords(word) {
+        if (!word || typeof word !== "string") {
+            return;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const wordIndex = settings.dictionaryWords.indexOf(word);
+        if (wordIndex !== -1) {
+            settings.dictionaryWords.splice(wordIndex, 1);
+            saveSpellCheckerSettings(settings);
+        }
+    }
+
+    /**
+     * Check if a word is in the ignored words list
+     * @param {string} word - the word to check
+     * @returns {boolean} - true if word is in ignored words list
+     */
+    function isWordIgnored(word) {
+        if (!word || typeof word !== "string") {
+            return false;
+        }
+
+        const settings = getSpellCheckerSettings();
+        return settings.ignoredWords.indexOf(word) !== -1;
+    }
+
+    /**
+     * Check if a word is in the dictionary words list
+     * @param {string} word - the word to check
+     * @returns {boolean} - true if word is in dictionary words list
+     */
+    function isWordInDictionary(word) {
+        if (!word || typeof word !== "string") {
+            return false;
+        }
+
+        const settings = getSpellCheckerSettings();
+        return settings.dictionaryWords.indexOf(word) !== -1;
+    }
+
+    /**
      * Check if spell checker is disabled
      * @returns {boolean} - true if spell checker is disabled
      */
@@ -148,6 +210,10 @@ define(function (require, exports, module) {
     exports.getDictionaryWords = getDictionaryWords;
     exports.addToIgnoredWords = addToIgnoredWords;
     exports.addToDictionaryWords = addToDictionaryWords;
+    exports.removeFromIgnoredWords = removeFromIgnoredWords;
+    exports.removeFromDictionaryWords = removeFromDictionaryWords;
+    exports.isWordIgnored = isWordIgnored;
+    exports.isWordInDictionary = isWordInDictionary;
     exports.isSpellCheckerDisabled = isSpellCheckerDisabled;
     exports.setSpellCheckerDisabled = setSpellCheckerDisabled;
     exports.isSpellCheckerDisabledForFile = isSpellCheckerDisabledForFile;

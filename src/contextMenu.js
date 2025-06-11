@@ -60,15 +60,29 @@ define(function (require, exports, module) {
 
         subMenu.addMenuDivider();
 
-        // Ignore Word
-        CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, IgnoreWords.addCurrentWordToIgnored);
+        // Ignore Word (will dynamically change to Unignore Word)
+        CommandManager.register(Strings.IGNORE_WORD, Commands.IGNORE_WORD, function() {
+            const isWordIgnored = IgnoreWords.isCurrentWordIgnored();
+            if (isWordIgnored) {
+                IgnoreWords.removeCurrentWordFromIgnored();
+            } else {
+                IgnoreWords.addCurrentWordToIgnored();
+            }
+        });
         subMenu.addMenuItem(Commands.IGNORE_WORD);
 
-        // Add Word to Dictionary
+        // Add Word to Dictionary (will dynamically change to Remove Word from Dictionary)
         CommandManager.register(
             Strings.ADD_WORD_TO_DICTIONARY,
             Commands.ADD_WORD_TO_DICTIONARY,
-            DictionaryWords.addCurrentWordToDictionary
+            function() {
+                const isWordInDictionary = DictionaryWords.isCurrentWordInDictionary();
+                if (isWordInDictionary) {
+                    DictionaryWords.removeCurrentWordFromDictionary();
+                } else {
+                    DictionaryWords.addCurrentWordToDictionary();
+                }
+            }
         );
         subMenu.addMenuItem(Commands.ADD_WORD_TO_DICTIONARY);
 
@@ -124,14 +138,33 @@ define(function (require, exports, module) {
             const hasFixableTypos = FixTypo.hasFixableTyposInFile();
             const isSpellCheckerEnabled = !Preferences.isSpellCheckerDisabled();
 
+            // Check if current word is already ignored or in dictionary
+            const isWordIgnored = IgnoreWords.isCurrentWordIgnored();
+            const isWordInDictionary = DictionaryWords.isCurrentWordInDictionary();
+
+            // Check if we have a valid word at cursor
+            const editor = EditorManager.getActiveEditor();
+            const hasCurrentWord = editor && Helper.getCurrentWord(editor) !== null;
+
             // Check if spell checker is enabled for the current file
             let isFileSpellCheckerEnabled = true;
-            const editor = EditorManager.getActiveEditor();
             if (editor) {
                 const fileData = Helper.getFileData(editor);
                 if (fileData) {
                     isFileSpellCheckerEnabled = !Preferences.isSpellCheckerDisabledForFile(fileData.filePath);
                 }
+            }
+
+            // Update ignore command text based on current word status
+            if (ignoreCommand) {
+                const ignoreText = isWordIgnored ? Strings.UNIGNORE_WORD : Strings.IGNORE_WORD;
+                ignoreCommand.setName(ignoreText);
+            }
+
+            // Update dictionary command text based on current word status
+            if (dictionaryCommand) {
+                const dictionaryText = isWordInDictionary ? Strings.REMOVE_WORD_FROM_DICTIONARY : Strings.ADD_WORD_TO_DICTIONARY;
+                dictionaryCommand.setName(dictionaryText);
             }
 
             // update the fix typo command text dynamically
@@ -144,10 +177,19 @@ define(function (require, exports, module) {
 
             // Disable spell check related commands if spell checker is disabled globally or for this file
             const spellCheckEnabled = isSpellCheckerEnabled && isFileSpellCheckerEnabled;
+
+            // Fix typo commands - only enabled for misspelled words
             fixTypoCommand.setEnabled(isMisspelled && typoInfo !== null && spellCheckEnabled);
             fixAllTyposCommand.setEnabled(hasFixableTypos && spellCheckEnabled);
-            ignoreCommand.setEnabled(isMisspelled && spellCheckEnabled);
-            dictionaryCommand.setEnabled(isMisspelled && spellCheckEnabled);
+
+            // Ignore/Unignore and Dictionary Add/Remove commands - enabled when we have a valid word at cursor
+            // For misspelled words, enable if not already in the respective list
+            // For ignored/dictionary words, enable to allow removal
+            const enableIgnoreCommand = hasCurrentWord && spellCheckEnabled && (isMisspelled || isWordIgnored);
+            const enableDictionaryCommand = hasCurrentWord && spellCheckEnabled && (isMisspelled || isWordInDictionary);
+
+            ignoreCommand.setEnabled(enableIgnoreCommand);
+            dictionaryCommand.setEnabled(enableDictionaryCommand);
         }
     }
 

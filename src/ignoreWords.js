@@ -10,6 +10,10 @@ define(function (require, exports, module) {
         Preferences.addToIgnoredWords(word);
     }
 
+    function removeFromIgnoredWords(word) {
+        Preferences.removeFromIgnoredWords(word);
+    }
+
     /**
      * This function gets the current misspelled word at cursor position and adds it to ignored words
      */
@@ -24,6 +28,26 @@ define(function (require, exports, module) {
 
         if (currentMisspelledWord) {
             addToIgnoredWords(currentMisspelledWord.word);
+
+            // trigger spell check immediately to reflect changes
+            Driver.driver();
+        }
+    }
+
+    /**
+     * This function gets the current word at cursor position and removes it from ignored words
+     */
+    function removeCurrentWordFromIgnored() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return;
+        }
+
+        // Use getCurrentWord to get the word regardless of misspelling status
+        const currentWord = Helper.getCurrentWord(editor);
+
+        if (currentWord && Preferences.isWordIgnored(currentWord)) {
+            removeFromIgnoredWords(currentWord);
 
             // trigger spell check immediately to reflect changes
             Driver.driver();
@@ -46,12 +70,34 @@ define(function (require, exports, module) {
         return currentMisspelledWord !== null;
     }
 
+    /**
+     * This function checks if the current word is in the ignored words list
+     * @returns {boolean} - true if current word is ignored, false otherwise
+     */
+    function isCurrentWordIgnored() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return false;
+        }
+
+        const currentWord = Helper.getCurrentWord(editor);
+
+        if (currentWord) {
+            return Preferences.isWordIgnored(currentWord);
+        }
+
+        return false;
+    }
+
     function getIgnoredWords() {
     	return Preferences.getIgnoredWords();
     }
 
     exports.addToIgnoredWords = addToIgnoredWords;
+    exports.removeFromIgnoredWords = removeFromIgnoredWords;
     exports.addCurrentWordToIgnored = addCurrentWordToIgnored;
+    exports.removeCurrentWordFromIgnored = removeCurrentWordFromIgnored;
     exports.isCurrentWordMisspelled = isCurrentWordMisspelled;
+    exports.isCurrentWordIgnored = isCurrentWordIgnored;
     exports.getIgnoredWords = getIgnoredWords;
 });

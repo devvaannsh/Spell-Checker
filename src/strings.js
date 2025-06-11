@@ -4,6 +4,8 @@ define(function (require, exports, module) {
     const FIX_ALL_TYPOS_IN_FILE = "Fix All Typos in File";
     const IGNORE_WORD = "Ignore Word";
     const ADD_WORD_TO_DICTIONARY = "Add Word to Dictionary";
+    const UNIGNORE_WORD = "Unignore Word";
+    const REMOVE_WORD_FROM_DICTIONARY = "Remove Word from Dictionary";
     const TOGGLE_SPELL_CHECKER = "Toggle Spell Checker";
     const DISABLE_SPELL_CHECKER = "Disable Spell Checker";
     const ENABLE_SPELL_CHECKER = "Enable Spell Checker";
@@ -16,6 +18,8 @@ define(function (require, exports, module) {
     exports.FIX_ALL_TYPOS_IN_FILE = FIX_ALL_TYPOS_IN_FILE;
     exports.IGNORE_WORD = IGNORE_WORD;
     exports.ADD_WORD_TO_DICTIONARY = ADD_WORD_TO_DICTIONARY;
+    exports.UNIGNORE_WORD = UNIGNORE_WORD;
+    exports.REMOVE_WORD_FROM_DICTIONARY = REMOVE_WORD_FROM_DICTIONARY;
     exports.TOGGLE_SPELL_CHECKER = TOGGLE_SPELL_CHECKER;
     exports.DISABLE_SPELL_CHECKER = DISABLE_SPELL_CHECKER;
     exports.ENABLE_SPELL_CHECKER = ENABLE_SPELL_CHECKER;

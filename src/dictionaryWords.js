@@ -10,6 +10,10 @@ define(function (require, exports, module) {
         Preferences.addToDictionaryWords(word);
     }
 
+    function removeFromDictionaryWords(word) {
+        Preferences.removeFromDictionaryWords(word);
+    }
+
     /**
      * This function gets the current misspelled word at cursor position and adds it to dictionary words
      */
@@ -31,19 +35,42 @@ define(function (require, exports, module) {
     }
 
     /**
-     * This function checks if there's a misspelled word at the current cursor position
-     * @returns {boolean} - true if there's a misspelled word at cursor, false otherwise
+     * This function gets the current word at cursor position and removes it from dictionary words
      */
-    function isCurrentWordMisspelled() {
+    function removeCurrentWordFromDictionary() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return;
+        }
+
+        // Use getCurrentWord to get the word regardless of misspelling status
+        const currentWord = Helper.getCurrentWord(editor);
+
+        if (currentWord && Preferences.isWordInDictionary(currentWord)) {
+            removeFromDictionaryWords(currentWord);
+
+            // trigger spell check immediately to reflect changes
+            Driver.driver();
+        }
+    }
+
+    /**
+     * This function checks if the current word is in the dictionary words list
+     * @returns {boolean} - true if current word is in dictionary, false otherwise
+     */
+    function isCurrentWordInDictionary() {
         const editor = EditorManager.getActiveEditor();
         if (!editor) {
             return false;
         }
 
-        const errors = UI.getErrors();
-        const currentMisspelledWord = Helper.getCurrentMisspelledWord(editor, errors);
+        const currentWord = Helper.getCurrentWord(editor);
 
-        return currentMisspelledWord !== null;
+        if (currentWord) {
+            return Preferences.isWordInDictionary(currentWord);
+        }
+
+        return false;
     }
 
     function getDictionaryWords() {
@@ -51,7 +78,9 @@ define(function (require, exports, module) {
     }
 
     exports.addToDictionaryWords = addToDictionaryWords;
+    exports.removeFromDictionaryWords = removeFromDictionaryWords;
     exports.addCurrentWordToDictionary = addCurrentWordToDictionary;
-    exports.isCurrentWordMisspelled = isCurrentWordMisspelled;
+    exports.removeCurrentWordFromDictionary = removeCurrentWordFromDictionary;
+    exports.isCurrentWordInDictionary = isCurrentWordInDictionary;
     exports.getDictionaryWords = getDictionaryWords;
 });

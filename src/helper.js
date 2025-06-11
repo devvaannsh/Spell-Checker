@@ -123,6 +123,49 @@ define(function (require, exports, module) {
     }
 
     /**
+     * This function gets the word at the current cursor position regardless of whether it's misspelled
+     * @param {Editor} editor - the editor instance
+     * @returns {string|null} - the word at cursor position, null if no word found
+     */
+    function getCurrentWord(editor) {
+        if (!editor) {
+            return null;
+        }
+
+        const cursor = editor.getCursorPos();
+        const document = editor.document;
+        const line = document.getLine(cursor.line);
+
+        if (!line) {
+            return null;
+        }
+
+        // Find word boundaries around cursor
+        let start = cursor.ch;
+        let end = cursor.ch;
+
+        // Move start position backwards to find word start
+        while (start > 0 && /\w/.test(line.charAt(start - 1))) {
+            start--;
+        }
+
+        // Move end position forwards to find word end
+        while (end < line.length && /\w/.test(line.charAt(end))) {
+            end++;
+        }
+
+        // Extract the word
+        const word = line.substring(start, end);
+
+        // Return word only if it's valid (contains letters and is not empty)
+        if (word && /[a-zA-Z]/.test(word)) {
+            return word;
+        }
+
+        return null;
+    }
+
+    /**
      * This function fixes the current misspelled word by replacing it with the suggestion
      * @param {Editor} editor - the editor instance
      * @param {Array} errors - array of current spell check errors
@@ -158,5 +201,6 @@ define(function (require, exports, module) {
     exports.getRequiredDataFromErrors = getRequiredDataFromErrors;
     exports.convertErrorsToCodeInspectionFormat = convertErrorsToCodeInspectionFormat;
     exports.getCurrentMisspelledWord = getCurrentMisspelledWord;
+    exports.getCurrentWord = getCurrentWord;
     exports.fixCurrentMisspelledWord = fixCurrentMisspelledWord;
 });
