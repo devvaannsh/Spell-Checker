@@ -45,10 +45,18 @@ define(function (require, exports, module) {
             // This ensures we fix from end to beginning, so offsets remain valid
             const sortedErrors = errors.slice().sort((a, b) => b.documentOffset - a.documentOffset);
 
-            // Fix each error that has a suggestion
-            for (let i = 0; i < sortedErrors.length; i++) {
-                const error = sortedErrors[i];
-                if (error.suggestion && error.suggestion.trim() !== "") {
+            // Filter errors that have suggestions
+            const fixableErrors = sortedErrors.filter(error => error.suggestion && error.suggestion.trim() !== "");
+
+            if (fixableErrors.length === 0) {
+                return;
+            }
+
+            // Batch all changes into a single undo operation
+            document.batchOperation(function () {
+                // Fix each error that has a suggestion
+                for (let i = 0; i < fixableErrors.length; i++) {
+                    const error = fixableErrors[i];
                     try {
                         // Replace the misspelled word with the suggestion
                         document.replaceRange(
@@ -61,7 +69,7 @@ define(function (require, exports, module) {
                         console.warn("Failed to fix typo:", error.text, err);
                     }
                 }
-            }
+            });
 
             if (fixedCount > 0) {
                 // trigger spell check immediately to reflect changes
