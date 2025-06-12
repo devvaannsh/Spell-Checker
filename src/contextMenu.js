@@ -152,6 +152,16 @@ define(function (require, exports, module) {
         });
         subMenu.addMenuItem(Commands.IGNORE_WORD);
 
+        // Ignore/Unignore All Words in File
+        CommandManager.register(
+            Strings.IGNORE_ALL_WORDS_IN_FILE,
+            Commands.IGNORE_ALL_WORDS_IN_FILE,
+            toggleIgnoreAllWordsInFile
+        );
+        subMenu.addMenuItem(Commands.IGNORE_ALL_WORDS_IN_FILE);
+
+        subMenu.addMenuDivider();
+
         // Add Word to Dictionary (will dynamically change to Remove Word from Dictionary)
         CommandManager.register(Strings.ADD_WORD_TO_DICTIONARY, Commands.ADD_WORD_TO_DICTIONARY, function () {
             const isWordInDictionary = DictionaryWords.isCurrentWordInDictionary();
@@ -162,16 +172,6 @@ define(function (require, exports, module) {
             }
         });
         subMenu.addMenuItem(Commands.ADD_WORD_TO_DICTIONARY);
-
-        subMenu.addMenuDivider();
-
-        // Ignore/Unignore All Words in File
-        CommandManager.register(
-            Strings.IGNORE_ALL_WORDS_IN_FILE,
-            Commands.IGNORE_ALL_WORDS_IN_FILE,
-            toggleIgnoreAllWordsInFile
-        );
-        subMenu.addMenuItem(Commands.IGNORE_ALL_WORDS_IN_FILE);
 
         // Add/Remove All Words to/from Dictionary for File
         CommandManager.register(
