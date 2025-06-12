@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const EditorManager = brackets.getModule("editor/EditorManager");
+    const _ = brackets.getModule("thirdparty/lodash");
 
     const Helper = require("./helper");
     const UI = require("./UI");
@@ -8,6 +9,10 @@ define(function (require, exports, module) {
     const Preferences = require("./preferences");
 
     let nodeConnector;
+
+    let fullFileCheckTimeout;
+    const FULL_FILE_CHECK_INTERVAL = 15000; // Check full file after every 15 seconds
+    const DEBOUNCE_DELAY = 400; // Debounce delay for spell checking
 
     /**
      * This is just for setting up the node connector
@@ -18,25 +23,81 @@ define(function (require, exports, module) {
     }
 
     /**
-     * This is the main driver function that handles everything, right from getting file content from the active document
-     * to calling the API to fetch all the errors, show spell error markers in the editor, show suggestions and everything
-     * This is just called inside the main.js init function
+     * This function gets the file data from the editor
+     * @param {Editor} editor - the editor instance
+     * @returns {Object|null} - object with filePath and content or null
      */
-    async function driver() {
-        // Check if spell checker is disabled globally
-        if (Preferences.isSpellCheckerDisabled()) {
+    function getFileData(editor) {
+        return Helper.getFileData(editor);
+    }
+
+    /**
+     * Performs spell check on specific lines of text
+     * @param {Editor} editor - the editor instance
+     * @param {number} fromLine - start line number
+     * @param {number} toLine - end line number
+     */
+    async function checkLines(editor, fromLine, toLine) {
+        const fileData = getFileData(editor);
+        if (!fileData) {
+            return;
+        }
+
+        // Check if spell checker is disabled globally or for this file
+        if (Preferences.isSpellCheckerDisabled() || Preferences.isSpellCheckerDisabledForFile(fileData.filePath)) {
             UI.clearErrors();
             return;
         }
 
+        try {
+            // Get the content of the specified lines
+            const lines = [];
+            for (let i = fromLine; i <= toLine; i++) {
+                lines.push(editor.getLine(i));
+            }
+            const content = lines.join("\n");
+            // get ignored words and dictionary words
+            const ignoreWords = IgnoreWords.getIgnoredWords();
+            const dictionaryWords = DictionaryWords.getDictionaryWords();
+
+            // call the API with the line content
+            const resultIssues = await nodeConnector.execPeer("checkSpelling", {
+                content: content,
+                filePath: fileData.filePath,
+                ignoreWords: ignoreWords,
+                dictionaryWords: dictionaryWords
+            });
+
+            // Get existing errors and filter out errors from the lines we're updating
+            const existingErrors = UI.getErrors().filter(
+                (error) => error.lineNumber < fromLine || error.lineNumber > toLine
+            );
+
+            // Process new errors and adjust line numbers
+            const newErrors = Helper.getRequiredDataFromErrors(resultIssues).map((error) => ({
+                ...error,
+                lineNumber: error.lineNumber + fromLine
+            }));
+
+            // Combine and display errors
+            UI.setErrors([...existingErrors, ...newErrors]);
+        } catch (error) {
+            console.error("Line spell check failed:", error);
+        }
+    }
+
+    /**
+     * Performs a full file spell check
+     */
+    async function driver() {
         const editor = EditorManager.getActiveEditor();
-        if (!editor) return;
+        const fileData = getFileData(editor);
+        if (!fileData) {
+            return;
+        }
 
-        const fileData = Helper.getFileData(editor);
-        if (!fileData || !nodeConnector) return;
-
-        // Check if spell checker is disabled for this specific file
-        if (Preferences.isSpellCheckerDisabledForFile(fileData.filePath)) {
+        // Check if spell checker is disabled globally or for this file
+        if (Preferences.isSpellCheckerDisabled() || Preferences.isSpellCheckerDisabledForFile(fileData.filePath)) {
             UI.clearErrors();
             return;
         }
@@ -66,19 +127,54 @@ define(function (require, exports, module) {
     }
 
     /**
+     * for a full file check
+     */
+    function scheduleFullFileCheck() {
+        if (fullFileCheckTimeout) {
+            clearTimeout(fullFileCheckTimeout);
+        }
+        fullFileCheckTimeout = setTimeout(driver, FULL_FILE_CHECK_INTERVAL);
+    }
+
+    /**
      * This function is called when any change is made in the editor
-     * TODO: we need to make it efficient like it was done for color preview
      * @private
      */
-    function _onChanged() {
-        driver();
+    function _onChanged(_evt, instance, changeList) {
+        if (!changeList || !changeList.length) {
+            return;
+        }
+
+        const changeObj = changeList[0];
+
+        // Handle simple edits (single character insertions/deletions)
+        if (changeList.length === 1 && (changeObj.origin === "+input" || changeObj.origin === "+delete")) {
+            // For simple edits, only check the affected lines
+            if (changeObj.from.line === changeObj.to.line) {
+                debouncedCheckLines(instance, changeObj.from.line, changeObj.to.line);
+                scheduleFullFileCheck();
+                return;
+            }
+        }
+
+        // For more complex changes (paste, cut, multiple lines, etc.), check the whole file
+        debouncedDriver();
     }
+
+    const debouncedCheckLines = _.debounce(checkLines, DEBOUNCE_DELAY);
+    const debouncedDriver = _.debounce(driver, DEBOUNCE_DELAY);
 
     /**
      * This function is called when the active editor is changed
      * @private
      */
     function _onActiveEditorChanged() {
+        // Clear any existing timeouts
+        if (fullFileCheckTimeout) {
+            clearTimeout(fullFileCheckTimeout);
+        }
+
+        // Run a full file check immediately when switching files
         driver();
 
         // register the change handler for the new editor
@@ -104,7 +200,7 @@ define(function (require, exports, module) {
         }
     }
 
+    exports.setNodeConnector = setNodeConnector;
     exports.driver = driver;
     exports.registerHandlers = registerHandlers;
-    exports.setNodeConnector = setNodeConnector;
 });
