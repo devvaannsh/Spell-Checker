@@ -13,9 +13,7 @@ define(function (require, exports, module) {
         ignoredWords: [],
         dictionaryWords: [],
         disabled: false,
-        disabledFiles: [],
-        fileIgnoredWords: {},
-        fileDictionaryWords: {}
+        disabledFiles: []
     };
 
     // the single spellChecker preference object
@@ -208,151 +206,7 @@ define(function (require, exports, module) {
         }
     }
 
-    /**
-     * Get ignored words for a specific file
-     * @param {string} filePath - the file path
-     * @returns {Array} - array of ignored words for this file
-     */
-    function getFileIgnoredWords(filePath) {
-        if (!filePath) return [];
 
-        const settings = getSpellCheckerSettings();
-        const fileIgnoredWords = settings.fileIgnoredWords || {};
-        return fileIgnoredWords[filePath] || [];
-    }
-
-    /**
-     * Add words to the ignored list for a specific file
-     * @param {string} filePath - the file path
-     * @param {Array} words - array of words to ignore for this file
-     */
-    function addWordsToFileIgnored(filePath, words) {
-        if (!filePath || !words || !Array.isArray(words) || words.length === 0) {
-            return;
-        }
-
-        const settings = getSpellCheckerSettings();
-        if (!settings.fileIgnoredWords) {
-            settings.fileIgnoredWords = {};
-        }
-
-        if (!settings.fileIgnoredWords[filePath]) {
-            settings.fileIgnoredWords[filePath] = [];
-        }
-
-        // Add only unique words
-        words.forEach(function (word) {
-            if (
-                typeof word === "string" &&
-                word.trim() !== "" &&
-                settings.fileIgnoredWords[filePath].indexOf(word) === -1
-            ) {
-                settings.fileIgnoredWords[filePath].push(word);
-            }
-        });
-
-        saveSpellCheckerSettings(settings);
-    }
-
-    /**
-     * Remove all ignored words for a specific file
-     * @param {string} filePath - the file path
-     */
-    function removeAllFileIgnoredWords(filePath) {
-        if (!filePath) return;
-
-        const settings = getSpellCheckerSettings();
-        if (settings.fileIgnoredWords && settings.fileIgnoredWords[filePath]) {
-            delete settings.fileIgnoredWords[filePath];
-            saveSpellCheckerSettings(settings);
-        }
-    }
-
-    /**
-     * Check if a file has any ignored words
-     * @param {string} filePath - the file path
-     * @returns {boolean} - true if file has ignored words
-     */
-    function hasFileIgnoredWords(filePath) {
-        if (!filePath) return false;
-
-        const settings = getSpellCheckerSettings();
-        const fileIgnoredWords = settings.fileIgnoredWords || {};
-        return fileIgnoredWords[filePath] && fileIgnoredWords[filePath].length > 0;
-    }
-
-    /**
-     * Get dictionary words for a specific file
-     * @param {string} filePath - the file path
-     * @returns {Array} - array of dictionary words for this file
-     */
-    function getFileDictionaryWords(filePath) {
-        if (!filePath) return [];
-
-        const settings = getSpellCheckerSettings();
-        const fileDictionaryWords = settings.fileDictionaryWords || {};
-        return fileDictionaryWords[filePath] || [];
-    }
-
-    /**
-     * Add words to the dictionary list for a specific file
-     * @param {string} filePath - the file path
-     * @param {Array} words - array of words to add to dictionary for this file
-     */
-    function addWordsToFileDictionary(filePath, words) {
-        if (!filePath || !words || !Array.isArray(words) || words.length === 0) {
-            return;
-        }
-
-        const settings = getSpellCheckerSettings();
-        if (!settings.fileDictionaryWords) {
-            settings.fileDictionaryWords = {};
-        }
-
-        if (!settings.fileDictionaryWords[filePath]) {
-            settings.fileDictionaryWords[filePath] = [];
-        }
-
-        // Add only unique words
-        words.forEach(function (word) {
-            if (
-                typeof word === "string" &&
-                word.trim() !== "" &&
-                settings.fileDictionaryWords[filePath].indexOf(word) === -1
-            ) {
-                settings.fileDictionaryWords[filePath].push(word);
-            }
-        });
-
-        saveSpellCheckerSettings(settings);
-    }
-
-    /**
-     * Remove all dictionary words for a specific file
-     * @param {string} filePath - the file path
-     */
-    function removeAllFileDictionaryWords(filePath) {
-        if (!filePath) return;
-
-        const settings = getSpellCheckerSettings();
-        if (settings.fileDictionaryWords && settings.fileDictionaryWords[filePath]) {
-            delete settings.fileDictionaryWords[filePath];
-            saveSpellCheckerSettings(settings);
-        }
-    }
-
-    /**
-     * Check if a file has any dictionary words
-     * @param {string} filePath - the file path
-     * @returns {boolean} - true if file has dictionary words
-     */
-    function hasFileDictionaryWords(filePath) {
-        if (!filePath) return false;
-
-        const settings = getSpellCheckerSettings();
-        const fileDictionaryWords = settings.fileDictionaryWords || {};
-        return fileDictionaryWords[filePath] && fileDictionaryWords[filePath].length > 0;
-    }
 
     exports.getIgnoredWords = getIgnoredWords;
     exports.getDictionaryWords = getDictionaryWords;
@@ -366,12 +220,4 @@ define(function (require, exports, module) {
     exports.setSpellCheckerDisabled = setSpellCheckerDisabled;
     exports.isSpellCheckerDisabledForFile = isSpellCheckerDisabledForFile;
     exports.setSpellCheckerDisabledForFile = setSpellCheckerDisabledForFile;
-    exports.getFileIgnoredWords = getFileIgnoredWords;
-    exports.addWordsToFileIgnored = addWordsToFileIgnored;
-    exports.removeAllFileIgnoredWords = removeAllFileIgnoredWords;
-    exports.hasFileIgnoredWords = hasFileIgnoredWords;
-    exports.getFileDictionaryWords = getFileDictionaryWords;
-    exports.addWordsToFileDictionary = addWordsToFileDictionary;
-    exports.removeAllFileDictionaryWords = removeAllFileDictionaryWords;
-    exports.hasFileDictionaryWords = hasFileDictionaryWords;
 });

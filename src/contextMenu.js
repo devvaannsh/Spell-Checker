@@ -50,30 +50,23 @@ define(function (require, exports, module) {
         const editor = EditorManager.getActiveEditor();
         if (!editor) return;
 
-        const fileData = Helper.getFileData(editor);
-        if (!fileData) return;
+        // Get all current misspelled words in the file and add them to global ignored words
+        const currentErrors = UI.getErrors();
 
-        const hasIgnoredWords = Preferences.hasFileIgnoredWords(fileData.filePath);
-
-        if (hasIgnoredWords) {
-            // Remove all ignored words for this file
-            Preferences.removeAllFileIgnoredWords(fileData.filePath);
-        } else {
-            // Get all current misspelled words in the file and ignore them
-            const currentErrors = UI.getErrors();
-
-            if (currentErrors && currentErrors.length > 0) {
-                // Extract unique misspelled words from current errors
-                const misspelledWords = [];
-                currentErrors.forEach(function (error) {
-                    if (error.text && misspelledWords.indexOf(error.text) === -1) {
-                        misspelledWords.push(error.text);
-                    }
-                });
-
-                if (misspelledWords.length > 0) {
-                    Preferences.addWordsToFileIgnored(fileData.filePath, misspelledWords);
+        if (currentErrors && currentErrors.length > 0) {
+            // Extract unique misspelled words from current errors
+            const misspelledWords = [];
+            currentErrors.forEach(function (error) {
+                if (error.text && misspelledWords.indexOf(error.text) === -1) {
+                    misspelledWords.push(error.text);
                 }
+            });
+
+            if (misspelledWords.length > 0) {
+                // Add each word to the global ignored words list
+                misspelledWords.forEach(function (word) {
+                    IgnoreWords.addToIgnoredWords(word);
+                });
             }
         }
 
@@ -88,30 +81,23 @@ define(function (require, exports, module) {
         const editor = EditorManager.getActiveEditor();
         if (!editor) return;
 
-        const fileData = Helper.getFileData(editor);
-        if (!fileData) return;
+        // Get all current misspelled words in the file and add them to global dictionary
+        const currentErrors = UI.getErrors();
 
-        const hasDictionaryWords = Preferences.hasFileDictionaryWords(fileData.filePath);
-
-        if (hasDictionaryWords) {
-            // Remove all dictionary words for this file
-            Preferences.removeAllFileDictionaryWords(fileData.filePath);
-        } else {
-            // Get all current misspelled words in the file and add them to dictionary
-            const currentErrors = UI.getErrors();
-
-            if (currentErrors && currentErrors.length > 0) {
-                // Extract unique misspelled words from current errors
-                const misspelledWords = [];
-                currentErrors.forEach(function (error) {
-                    if (error.text && misspelledWords.indexOf(error.text) === -1) {
-                        misspelledWords.push(error.text);
-                    }
-                });
-
-                if (misspelledWords.length > 0) {
-                    Preferences.addWordsToFileDictionary(fileData.filePath, misspelledWords);
+        if (currentErrors && currentErrors.length > 0) {
+            // Extract unique misspelled words from current errors
+            const misspelledWords = [];
+            currentErrors.forEach(function (error) {
+                if (error.text && misspelledWords.indexOf(error.text) === -1) {
+                    misspelledWords.push(error.text);
                 }
+            });
+
+            if (misspelledWords.length > 0) {
+                // Add each word to the global dictionary words list
+                misspelledWords.forEach(function (word) {
+                    DictionaryWords.addToDictionaryWords(word);
+                });
             }
         }
 
@@ -282,62 +268,31 @@ define(function (require, exports, module) {
                 dictionaryCommand.setName(dictionaryText);
             }
 
-            // Update ignore all command text based on file's ignored words status
+            // Update ignore all command text and enable status
             if (ignoreAllCommand) {
-                const editor = EditorManager.getActiveEditor();
-                let hasFileIgnoredWords = false;
-                let hasCurrentErrors = false;
-
-                if (editor) {
-                    const fileData = Helper.getFileData(editor);
-                    if (fileData) {
-                        hasFileIgnoredWords = Preferences.hasFileIgnoredWords(fileData.filePath);
-                    }
-                }
+                // Always show "Ignore All Misspelled Words in File" since it now adds to global list
+                ignoreAllCommand.setName(Strings.IGNORE_ALL_WORDS_IN_FILE);
 
                 // Check if there are current spelling errors to ignore
                 const currentErrors = UI.getErrors();
-                hasCurrentErrors = currentErrors && currentErrors.length > 0;
+                const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-                const ignoreAllText = hasFileIgnoredWords
-                    ? Strings.UNIGNORE_ALL_WORDS_IN_FILE
-                    : Strings.IGNORE_ALL_WORDS_IN_FILE;
-                ignoreAllCommand.setName(ignoreAllText);
-
-                // Enable the command if spell checker is enabled for this file and either:
-                // 1. There are current errors to ignore, OR
-                // 2. There are already ignored words for this file to unignore
-                const enableIgnoreAllCommand = spellCheckEnabled && (hasCurrentErrors || hasFileIgnoredWords);
+                // Enable the command only if spell checker is enabled and there are current errors
+                const enableIgnoreAllCommand = spellCheckEnabled && hasCurrentErrors;
                 ignoreAllCommand.setEnabled(enableIgnoreAllCommand);
             }
 
-            // Update add all to dictionary command text based on file's dictionary words status
+            // Update add all to dictionary command text and enable status
             if (addAllToDictionaryCommand) {
-                const editor = EditorManager.getActiveEditor();
-                let hasFileDictionaryWords = false;
-                let hasCurrentErrors = false;
-
-                if (editor) {
-                    const fileData = Helper.getFileData(editor);
-                    if (fileData) {
-                        hasFileDictionaryWords = Preferences.hasFileDictionaryWords(fileData.filePath);
-                    }
-                }
+                // Always show "Add All Misspelled Words in File to Dictionary" since it now adds to global dictionary
+                addAllToDictionaryCommand.setName(Strings.ADD_ALL_WORDS_TO_DICTIONARY);
 
                 // Check if there are current spelling errors to add to dictionary
                 const currentErrors = UI.getErrors();
-                hasCurrentErrors = currentErrors && currentErrors.length > 0;
+                const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-                const addAllToDictionaryText = hasFileDictionaryWords
-                    ? Strings.REMOVE_ALL_WORDS_FROM_DICTIONARY
-                    : Strings.ADD_ALL_WORDS_TO_DICTIONARY;
-                addAllToDictionaryCommand.setName(addAllToDictionaryText);
-
-                // Enable the command if spell checker is enabled for this file and either:
-                // 1. There are current errors to add to dictionary, OR
-                // 2. There are already dictionary words for this file to remove
-                const enableAddAllToDictionaryCommand =
-                    spellCheckEnabled && (hasCurrentErrors || hasFileDictionaryWords);
+                // Enable the command only if spell checker is enabled and there are current errors
+                const enableAddAllToDictionaryCommand = spellCheckEnabled && hasCurrentErrors;
                 addAllToDictionaryCommand.setEnabled(enableAddAllToDictionaryCommand);
             }
 
