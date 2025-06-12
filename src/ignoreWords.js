@@ -89,6 +89,67 @@ define(function (require, exports, module) {
         return false;
     }
 
+    /**
+     * This function removes all words in the current file that are in the ignored words list
+     * from the ignored words list
+     */
+    function unignoreAllWordsInFile() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return;
+        }
+
+        const fileData = Helper.getFileData(editor);
+        if (!fileData) {
+            return;
+        }
+
+        // Get all words in the file
+        const allWordsInFile = Helper.getAllWordsInFile(editor);
+        const ignoredWords = Preferences.getIgnoredWords();
+
+        // Find words that are both in the file and in the ignored list
+        const wordsToUnignore = [];
+        allWordsInFile.forEach(function(word) {
+            if (ignoredWords.indexOf(word) !== -1 && wordsToUnignore.indexOf(word) === -1) {
+                wordsToUnignore.push(word);
+            }
+        });
+
+        // Remove each word from the ignored list
+        wordsToUnignore.forEach(function(word) {
+            removeFromIgnoredWords(word);
+        });
+
+        // trigger spell check immediately to reflect changes if any words were unignored
+        if (wordsToUnignore.length > 0) {
+            Driver.driver();
+        }
+    }
+
+    /**
+     * This function checks if there are any ignored words in the current file
+     * @returns {boolean} - true if there are ignored words in the file, false otherwise
+     */
+    function hasIgnoredWordsInFile() {
+        const editor = EditorManager.getActiveEditor();
+        if (!editor) {
+            return false;
+        }
+
+        const allWordsInFile = Helper.getAllWordsInFile(editor);
+        const ignoredWords = Preferences.getIgnoredWords();
+
+        // Check if any word in the file is in the ignored list
+        for (let i = 0; i < allWordsInFile.length; i++) {
+            if (ignoredWords.indexOf(allWordsInFile[i]) !== -1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function getIgnoredWords() {
         return Preferences.getIgnoredWords();
     }
@@ -99,5 +160,7 @@ define(function (require, exports, module) {
     exports.removeCurrentWordFromIgnored = removeCurrentWordFromIgnored;
     exports.isCurrentWordMisspelled = isCurrentWordMisspelled;
     exports.isCurrentWordIgnored = isCurrentWordIgnored;
+    exports.unignoreAllWordsInFile = unignoreAllWordsInFile;
+    exports.hasIgnoredWordsInFile = hasIgnoredWordsInFile;
     exports.getIgnoredWords = getIgnoredWords;
 });

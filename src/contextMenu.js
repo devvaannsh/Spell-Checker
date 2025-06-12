@@ -50,10 +50,12 @@ define(function (require, exports, module) {
         const editor = EditorManager.getActiveEditor();
         if (!editor) return;
 
-        // Get all current misspelled words in the file and add them to global ignored words
+        // Check if there are current visible spelling errors
         const currentErrors = UI.getErrors();
+        const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-        if (currentErrors && currentErrors.length > 0) {
+        if (hasCurrentErrors) {
+            // If there are visible errors, ignore them all
             // Extract unique misspelled words from current errors
             const misspelledWords = [];
             currentErrors.forEach(function (error) {
@@ -68,10 +70,13 @@ define(function (require, exports, module) {
                     IgnoreWords.addToIgnoredWords(word);
                 });
             }
-        }
 
-        // Re-run driver to apply changes immediately
-        Driver.driver();
+            // Re-run driver to apply changes immediately
+            Driver.driver();
+        } else {
+            // If no visible errors, unignore all words in the file
+            IgnoreWords.unignoreAllWordsInFile();
+        }
     }
 
     /**
@@ -270,16 +275,23 @@ define(function (require, exports, module) {
 
             // Update ignore all command text and enable status
             if (ignoreAllCommand) {
-                // Always show "Ignore All Misspelled Words in File" since it now adds to global list
-                ignoreAllCommand.setName(Strings.IGNORE_ALL_WORDS_IN_FILE);
-
-                // Check if there are current spelling errors to ignore
+                // Check if there are current spelling errors visible
                 const currentErrors = UI.getErrors();
                 const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-                // Enable the command only if spell checker is enabled and there are current errors
-                const enableIgnoreAllCommand = spellCheckEnabled && hasCurrentErrors;
-                ignoreAllCommand.setEnabled(enableIgnoreAllCommand);
+                if (hasCurrentErrors) {
+                    // Show "Ignore All Misspelled Words in File" if there are visible errors
+                    ignoreAllCommand.setName(Strings.IGNORE_ALL_WORDS_IN_FILE);
+                    // Enable the command only if spell checker is enabled and there are current errors
+                    ignoreAllCommand.setEnabled(spellCheckEnabled && hasCurrentErrors);
+                } else {
+                    // Show "Unignore All Misspelled Words in File" if no visible errors but there are ignored words in file
+                    ignoreAllCommand.setName(Strings.UNIGNORE_ALL_WORDS_IN_FILE);
+                    // Check if there are ignored words in the current file
+                    const hasIgnoredWords = IgnoreWords.hasIgnoredWordsInFile();
+                    // Enable if spell checker is enabled and there are ignored words in file
+                    ignoreAllCommand.setEnabled(spellCheckEnabled && hasIgnoredWords);
+                }
             }
 
             // Update add all to dictionary command text and enable status

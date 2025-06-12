@@ -195,10 +195,39 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * This function gets all words in the current file
+     * @param {Editor} editor - the editor instance
+     * @returns {Array} - array of unique words found in the file
+     */
+    function getAllWordsInFile(editor) {
+        if (!editor) {
+            return [];
+        }
+
+        const document = editor.document;
+        const content = document.getText();
+
+        // Use regex to find all words (sequences of word characters)
+        const wordRegex = /\b[a-zA-Z]+\b/g;
+        const matches = content.match(wordRegex) || [];
+
+        // Return unique words only
+        const uniqueWords = [];
+        matches.forEach(function(word) {
+            if (uniqueWords.indexOf(word) === -1) {
+                uniqueWords.push(word);
+            }
+        });
+
+        return uniqueWords;
+    }
+
     exports.getFileData = getFileData;
     exports.getRequiredDataFromErrors = getRequiredDataFromErrors;
     exports.convertErrorsToCodeInspectionFormat = convertErrorsToCodeInspectionFormat;
     exports.getCurrentMisspelledWord = getCurrentMisspelledWord;
     exports.getCurrentWord = getCurrentWord;
     exports.fixCurrentMisspelledWord = fixCurrentMisspelledWord;
+    exports.getAllWordsInFile = getAllWordsInFile;
 });
