@@ -86,10 +86,12 @@ define(function (require, exports, module) {
         const editor = EditorManager.getActiveEditor();
         if (!editor) return;
 
-        // Get all current misspelled words in the file and add them to global dictionary
+        // Check if there are current visible spelling errors
         const currentErrors = UI.getErrors();
+        const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-        if (currentErrors && currentErrors.length > 0) {
+        if (hasCurrentErrors) {
+            // If there are visible errors, add them all to dictionary
             // Extract unique misspelled words from current errors
             const misspelledWords = [];
             currentErrors.forEach(function (error) {
@@ -104,10 +106,13 @@ define(function (require, exports, module) {
                     DictionaryWords.addToDictionaryWords(word);
                 });
             }
-        }
 
-        // Re-run driver to apply changes immediately
-        Driver.driver();
+            // Re-run driver to apply changes immediately
+            Driver.driver();
+        } else {
+            // If no visible errors, remove all words in the file from dictionary
+            DictionaryWords.removeAllWordsFromDictionary();
+        }
     }
 
     function _addSubMenuToEditorMenu() {
@@ -296,16 +301,23 @@ define(function (require, exports, module) {
 
             // Update add all to dictionary command text and enable status
             if (addAllToDictionaryCommand) {
-                // Always show "Add All Misspelled Words in File to Dictionary" since it now adds to global dictionary
-                addAllToDictionaryCommand.setName(Strings.ADD_ALL_WORDS_TO_DICTIONARY);
-
-                // Check if there are current spelling errors to add to dictionary
+                // Check if there are current spelling errors visible
                 const currentErrors = UI.getErrors();
                 const hasCurrentErrors = currentErrors && currentErrors.length > 0;
 
-                // Enable the command only if spell checker is enabled and there are current errors
-                const enableAddAllToDictionaryCommand = spellCheckEnabled && hasCurrentErrors;
-                addAllToDictionaryCommand.setEnabled(enableAddAllToDictionaryCommand);
+                if (hasCurrentErrors) {
+                    // Show "Add All Misspelled Words in File to Dictionary" if there are visible errors
+                    addAllToDictionaryCommand.setName(Strings.ADD_ALL_WORDS_TO_DICTIONARY);
+                    // Enable the command only if spell checker is enabled and there are current errors
+                    addAllToDictionaryCommand.setEnabled(spellCheckEnabled && hasCurrentErrors);
+                } else {
+                    // Show "Remove All Misspelled Words in File from Dictionary" if no visible errors but there are dictionary words in file
+                    addAllToDictionaryCommand.setName(Strings.REMOVE_ALL_WORDS_FROM_DICTIONARY);
+                    // Check if there are dictionary words in the current file
+                    const hasDictionaryWords = DictionaryWords.hasDictionaryWordsInFile();
+                    // Enable if spell checker is enabled and there are dictionary words in file
+                    addAllToDictionaryCommand.setEnabled(spellCheckEnabled && hasDictionaryWords);
+                }
             }
 
             // update the fix typo command text dynamically
