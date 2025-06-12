@@ -3,13 +3,13 @@ define(function (require, exports, module) {
     const FIX_TYPO = "Fix Typo";
     const FIX_ALL_TYPOS_IN_FILE = "Fix All Typos in File";
     const IGNORE_WORD = "Ignore Word";
-    const ADD_WORD_TO_DICTIONARY = "Add Word to Dictionary";
     const UNIGNORE_WORD = "Unignore Word";
+    const ADD_WORD_TO_DICTIONARY = "Add Word to Dictionary";
     const REMOVE_WORD_FROM_DICTIONARY = "Remove Word from Dictionary";
     const IGNORE_ALL_WORDS_IN_FILE = "Ignore All Misspelled Words in File";
-    const UNIGNORE_ALL_WORDS_IN_FILE = "Unignore All Words for File";
+    const UNIGNORE_ALL_WORDS_IN_FILE = "Unignore All Misspelled Words in File";
     const ADD_ALL_WORDS_TO_DICTIONARY = "Add All Misspelled Words in File to Dictionary";
-    const REMOVE_ALL_WORDS_FROM_DICTIONARY = "Remove All Words from Dictionary for File";
+    const REMOVE_ALL_WORDS_FROM_DICTIONARY = "Remove All Misspelled Words in File from Dictionary";
     const TOGGLE_SPELL_CHECKER = "Toggle Spell Checker";
     const DISABLE_SPELL_CHECKER = "Disable Spell Checker";
     const ENABLE_SPELL_CHECKER = "Enable Spell Checker";
