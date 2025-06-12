@@ -14,7 +14,6 @@ define(function (require, exports, module) {
      */
     let cachedErrors = [];
 
-
     /**
      * This function is called by the CodeInspection to scan the file for all the spelling errors
      *

@@ -74,7 +74,7 @@ define(function (require, exports, module) {
     }
 
     function getDictionaryWords() {
-    	return Preferences.getDictionaryWords();
+        return Preferences.getDictionaryWords();
     }
 
     exports.addToDictionaryWords = addToDictionaryWords;

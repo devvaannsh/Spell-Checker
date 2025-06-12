@@ -1,8 +1,8 @@
 define(function (require, exports, module) {
-	const EditorManager = brackets.getModule("editor/EditorManager");
+    const EditorManager = brackets.getModule("editor/EditorManager");
 
-	const Helper = require("./helper");
-	const UI = require("./UI");
+    const Helper = require("./helper");
+    const UI = require("./UI");
     const Driver = require("./driver");
     const Preferences = require("./preferences");
 
@@ -90,7 +90,7 @@ define(function (require, exports, module) {
     }
 
     function getIgnoredWords() {
-    	return Preferences.getIgnoredWords();
+        return Preferences.getIgnoredWords();
     }
 
     exports.addToIgnoredWords = addToIgnoredWords;

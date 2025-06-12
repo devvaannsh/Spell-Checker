@@ -235,7 +235,14 @@ define(function (require, exports, module) {
             toggleFileCommand.setName(toggleFileText);
         }
 
-        if (fixTypoCommand && fixAllTyposCommand && ignoreCommand && dictionaryCommand && ignoreAllCommand && addAllToDictionaryCommand) {
+        if (
+            fixTypoCommand &&
+            fixAllTyposCommand &&
+            ignoreCommand &&
+            dictionaryCommand &&
+            ignoreAllCommand &&
+            addAllToDictionaryCommand
+        ) {
             const isMisspelled = FixTypo.isCurrentWordMisspelled();
             const typoInfo = FixTypo.getCurrentTypoInfo();
             const hasFixableTypos = FixTypo.hasFixableTyposInFile();
@@ -329,7 +336,8 @@ define(function (require, exports, module) {
                 // Enable the command if spell checker is enabled for this file and either:
                 // 1. There are current errors to add to dictionary, OR
                 // 2. There are already dictionary words for this file to remove
-                const enableAddAllToDictionaryCommand = spellCheckEnabled && (hasCurrentErrors || hasFileDictionaryWords);
+                const enableAddAllToDictionaryCommand =
+                    spellCheckEnabled && (hasCurrentErrors || hasFileDictionaryWords);
                 addAllToDictionaryCommand.setEnabled(enableAddAllToDictionaryCommand);
             }
 

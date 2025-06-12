@@ -46,7 +46,7 @@ define(function (require, exports, module) {
             const sortedErrors = errors.slice().sort((a, b) => b.documentOffset - a.documentOffset);
 
             // Filter errors that have suggestions
-            const fixableErrors = sortedErrors.filter(error => error.suggestion && error.suggestion.trim() !== "");
+            const fixableErrors = sortedErrors.filter((error) => error.suggestion && error.suggestion.trim() !== "");
 
             if (fixableErrors.length === 0) {
                 return;

@@ -241,9 +241,12 @@ define(function (require, exports, module) {
         }
 
         // Add only unique words
-        words.forEach(function(word) {
-            if (typeof word === "string" && word.trim() !== "" &&
-                settings.fileIgnoredWords[filePath].indexOf(word) === -1) {
+        words.forEach(function (word) {
+            if (
+                typeof word === "string" &&
+                word.trim() !== "" &&
+                settings.fileIgnoredWords[filePath].indexOf(word) === -1
+            ) {
                 settings.fileIgnoredWords[filePath].push(word);
             }
         });
@@ -311,9 +314,12 @@ define(function (require, exports, module) {
         }
 
         // Add only unique words
-        words.forEach(function(word) {
-            if (typeof word === "string" && word.trim() !== "" &&
-                settings.fileDictionaryWords[filePath].indexOf(word) === -1) {
+        words.forEach(function (word) {
+            if (
+                typeof word === "string" &&
+                word.trim() !== "" &&
+                settings.fileDictionaryWords[filePath].indexOf(word) === -1
+            ) {
                 settings.fileDictionaryWords[filePath].push(word);
             }
         });

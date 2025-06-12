@@ -13,7 +13,6 @@ async function initCSpell() {
     return cspell;
 }
 
-
 /**
  * This is the main function which calls the cspell library to check for misspelled words
  * @param {Object} - the fileData object containing the filePath, content of the file
@@ -35,7 +34,6 @@ async function checkSpelling(fileData) {
 
         // an array of the issues found in the file, or maybe empty if no issues were found
         return results.issues;
-
     } catch (error) {
         console.error("Spell check error:", error);
         return [];

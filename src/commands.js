@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-	const SPELL_CHECKER_SUBMENU_ID = "spell-checker-submenu";
+    const SPELL_CHECKER_SUBMENU_ID = "spell-checker-submenu";
     const FIX_TYPO = "spellchecker.fixTypo";
     const FIX_ALL_TYPOS_IN_FILE = "spellchecker.fixAllTyposInFile";
     const IGNORE_WORD = "spellchecker.ignoreWord";

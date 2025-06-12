@@ -109,9 +109,7 @@ define(function (require, exports, module) {
         // find if cursor is within any misspelled word
         for (let i = 0; i < errors.length; i++) {
             const error = errors[i];
-            if (error.lineNumber === line &&
-                ch >= error.lineCharStart &&
-                ch <= error.lineCharEnd) {
+            if (error.lineNumber === line && ch >= error.lineCharStart && ch <= error.lineCharEnd) {
                 return {
                     word: error.text,
                     error: error

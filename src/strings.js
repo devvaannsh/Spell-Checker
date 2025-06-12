@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-	const SPELL_CHECKER_SUBMENU_NAME = "Spell Checker";
+    const SPELL_CHECKER_SUBMENU_NAME = "Spell Checker";
     const FIX_TYPO = "Fix Typo";
     const FIX_ALL_TYPOS_IN_FILE = "Fix All Typos in File";
     const IGNORE_WORD = "Ignore Word";
