@@ -108,11 +108,16 @@ define(function (require, exports, module) {
         const allWordsInFile = Helper.getAllWordsInFile(editor);
         const ignoredWords = Preferences.getIgnoredWords();
 
-        // Find words that are both in the file and in the ignored list
+        // Find words that are both in the file and in the ignored list (case-insensitive)
         const wordsToUnignore = [];
         allWordsInFile.forEach(function(word) {
-            if (ignoredWords.indexOf(word) !== -1 && wordsToUnignore.indexOf(word) === -1) {
-                wordsToUnignore.push(word);
+            // Check if this word is ignored (case-insensitive)
+            if (Preferences.isWordIgnored(word)) {
+                // Find the exact case match in ignored words to remove
+                const exactMatch = Preferences.findIgnoredWordExactCase(word);
+                if (exactMatch && wordsToUnignore.indexOf(exactMatch) === -1) {
+                    wordsToUnignore.push(exactMatch);
+                }
             }
         });
 
@@ -138,11 +143,10 @@ define(function (require, exports, module) {
         }
 
         const allWordsInFile = Helper.getAllWordsInFile(editor);
-        const ignoredWords = Preferences.getIgnoredWords();
 
-        // Check if any word in the file is in the ignored list
+        // Check if any word in the file is in the ignored list (case-insensitive)
         for (let i = 0; i < allWordsInFile.length; i++) {
-            if (ignoredWords.indexOf(allWordsInFile[i]) !== -1) {
+            if (Preferences.isWordIgnored(allWordsInFile[i])) {
                 return true;
             }
         }

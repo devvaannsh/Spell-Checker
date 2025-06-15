@@ -87,41 +87,7 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Remove a word from ignored words list
-     * @param {string} word - the word to remove from ignored words
-     */
-    function removeFromIgnoredWords(word) {
-        if (!word || typeof word !== "string") {
-            return;
-        }
-
-        const settings = getSpellCheckerSettings();
-        const wordIndex = settings.ignoredWords.indexOf(word);
-        if (wordIndex !== -1) {
-            settings.ignoredWords.splice(wordIndex, 1);
-            saveSpellCheckerSettings(settings);
-        }
-    }
-
-    /**
-     * Remove a word from dictionary words list
-     * @param {string} word - the word to remove from dictionary
-     */
-    function removeFromDictionaryWords(word) {
-        if (!word || typeof word !== "string") {
-            return;
-        }
-
-        const settings = getSpellCheckerSettings();
-        const wordIndex = settings.dictionaryWords.indexOf(word);
-        if (wordIndex !== -1) {
-            settings.dictionaryWords.splice(wordIndex, 1);
-            saveSpellCheckerSettings(settings);
-        }
-    }
-
-    /**
-     * Check if a word is in the ignored words list
+     * Check if a word is in the ignored words list (case-insensitive)
      * @param {string} word - the word to check
      * @returns {boolean} - true if word is in ignored words list
      */
@@ -131,11 +97,15 @@ define(function (require, exports, module) {
         }
 
         const settings = getSpellCheckerSettings();
-        return settings.ignoredWords.indexOf(word) !== -1;
+        const ignoredWords = settings.ignoredWords || [];
+
+        // Case-insensitive comparison
+        const lowerWord = word.toLowerCase();
+        return ignoredWords.some(ignoredWord => ignoredWord.toLowerCase() === lowerWord);
     }
 
     /**
-     * Check if a word is in the dictionary words list
+     * Check if a word is in the dictionary words list (case-insensitive)
      * @param {string} word - the word to check
      * @returns {boolean} - true if word is in dictionary words list
      */
@@ -145,7 +115,87 @@ define(function (require, exports, module) {
         }
 
         const settings = getSpellCheckerSettings();
-        return settings.dictionaryWords.indexOf(word) !== -1;
+        const dictionaryWords = settings.dictionaryWords || [];
+
+        // Case-insensitive comparison
+        const lowerWord = word.toLowerCase();
+        return dictionaryWords.some(dictWord => dictWord.toLowerCase() === lowerWord);
+    }
+
+    /**
+     * Helper function to find the exact case match in ignored words list
+     * @param {string} word - the word to find
+     * @returns {string|null} - the exact match from the list or null if not found
+     */
+    function findIgnoredWordExactCase(word) {
+        if (!word || typeof word !== "string") {
+            return null;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const ignoredWords = settings.ignoredWords || [];
+        const lowerWord = word.toLowerCase();
+
+        return ignoredWords.find(ignoredWord => ignoredWord.toLowerCase() === lowerWord) || null;
+    }
+
+    /**
+     * Helper function to find the exact case match in dictionary words list
+     * @param {string} word - the word to find
+     * @returns {string|null} - the exact match from the list or null if not found
+     */
+    function findDictionaryWordExactCase(word) {
+        if (!word || typeof word !== "string") {
+            return null;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const dictionaryWords = settings.dictionaryWords || [];
+        const lowerWord = word.toLowerCase();
+
+        return dictionaryWords.find(dictWord => dictWord.toLowerCase() === lowerWord) || null;
+    }
+
+    /**
+     * Remove a word from ignored words list (case-insensitive)
+     * @param {string} word - the word to remove from ignored words
+     */
+    function removeFromIgnoredWords(word) {
+        if (!word || typeof word !== "string") {
+            return;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const exactMatch = findIgnoredWordExactCase(word);
+
+        if (exactMatch) {
+            const wordIndex = settings.ignoredWords.indexOf(exactMatch);
+            if (wordIndex !== -1) {
+                settings.ignoredWords.splice(wordIndex, 1);
+                saveSpellCheckerSettings(settings);
+            }
+        }
+    }
+
+    /**
+     * Remove a word from dictionary words list (case-insensitive)
+     * @param {string} word - the word to remove from dictionary
+     */
+    function removeFromDictionaryWords(word) {
+        if (!word || typeof word !== "string") {
+            return;
+        }
+
+        const settings = getSpellCheckerSettings();
+        const exactMatch = findDictionaryWordExactCase(word);
+
+        if (exactMatch) {
+            const wordIndex = settings.dictionaryWords.indexOf(exactMatch);
+            if (wordIndex !== -1) {
+                settings.dictionaryWords.splice(wordIndex, 1);
+                saveSpellCheckerSettings(settings);
+            }
+        }
     }
 
     /**
@@ -206,8 +256,6 @@ define(function (require, exports, module) {
         }
     }
 
-
-
     exports.getIgnoredWords = getIgnoredWords;
     exports.getDictionaryWords = getDictionaryWords;
     exports.addToIgnoredWords = addToIgnoredWords;
@@ -216,6 +264,8 @@ define(function (require, exports, module) {
     exports.removeFromDictionaryWords = removeFromDictionaryWords;
     exports.isWordIgnored = isWordIgnored;
     exports.isWordInDictionary = isWordInDictionary;
+    exports.findIgnoredWordExactCase = findIgnoredWordExactCase;
+    exports.findDictionaryWordExactCase = findDictionaryWordExactCase;
     exports.isSpellCheckerDisabled = isSpellCheckerDisabled;
     exports.setSpellCheckerDisabled = setSpellCheckerDisabled;
     exports.isSpellCheckerDisabledForFile = isSpellCheckerDisabledForFile;

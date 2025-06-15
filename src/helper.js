@@ -30,6 +30,50 @@ define(function (require, exports, module) {
     }
 
     /**
+     * This function preserves the case pattern of the original word when applying a suggestion
+     * @param {string} originalWord - the original misspelled word
+     * @param {string} suggestion - the lowercase suggestion
+     * @returns {string} - the suggestion with preserved case pattern
+     */
+    function preserveCase(originalWord, suggestion) {
+        if (!originalWord || !suggestion) {
+            return suggestion;
+        }
+
+        // If the original word is all uppercase, return suggestion in uppercase
+        if (originalWord === originalWord.toUpperCase()) {
+            return suggestion.toUpperCase();
+        }
+
+        // If the original word starts with uppercase, capitalize the suggestion
+        if (originalWord[0] === originalWord[0].toUpperCase() && originalWord.length > 1) {
+            return suggestion.charAt(0).toUpperCase() + suggestion.slice(1).toLowerCase();
+        }
+
+        // If original word is all lowercase, return suggestion as is
+        if (originalWord === originalWord.toLowerCase()) {
+            return suggestion.toLowerCase();
+        }
+
+        // For mixed case, try to preserve the pattern
+        let result = "";
+        for (let i = 0; i < Math.min(originalWord.length, suggestion.length); i++) {
+            if (originalWord[i] === originalWord[i].toUpperCase()) {
+                result += suggestion[i].toUpperCase();
+            } else {
+                result += suggestion[i].toLowerCase();
+            }
+        }
+
+        // If suggestion is longer than original, append remaining characters in lowercase
+        if (suggestion.length > originalWord.length) {
+            result += suggestion.slice(originalWord.length).toLowerCase();
+        }
+
+        return result;
+    }
+
+    /**
      * This function is responsible to get the required data from the result issues.
      * this is needed because the API provides lots of unnecessary data that we might not need,
      * and also some data is not in the format as how we expect it to be
@@ -40,8 +84,12 @@ define(function (require, exports, module) {
     function getRequiredDataFromErrors(resultIssues) {
         const errors = [];
         for (let i = 0; i < resultIssues.length; i++) {
+            const originalWord = resultIssues[i].text;
+            const rawSuggestion = resultIssues[i].suggestions && resultIssues[i].suggestions[0];
+            const suggestion = rawSuggestion ? preserveCase(originalWord, rawSuggestion) : rawSuggestion;
+
             errors.push({
-                text: resultIssues[i].text, // the spelling error word {String} ex: hallo
+                text: originalWord, // the spelling error word {String} ex: hallo
                 textLength: resultIssues[i].length, // the length of the word which has the spelling error {Number} ex: 5
                 documentOffset: resultIssues[i].offset, // the char pos as per the document {Number} ex: 92
                 lineText: resultIssues[i].line.text, // the whole line text {String} ex: <p>hallo world</p>
@@ -49,7 +97,7 @@ define(function (require, exports, module) {
                 lineNumber: resultIssues[i].line.position.line, // the line number in which the error is {Number} ex: 5 0-indexed
                 lineCharStart: resultIssues[i].offset - resultIssues[i].line.offset, // the starting char position of the misspelled word {Number} ex: 5 0-indexed, calculated by subtracting the documentOffset - lineOffset
                 lineCharEnd: resultIssues[i].offset - resultIssues[i].line.offset + resultIssues[i].length, // the ending char position of the misspelled word {Number} ex: 10 0-indexed, calculated by subtracting the documentOffset - lineOffset + textLength
-                suggestion: resultIssues[i].suggestions[0] // suggestion for the correct spelling. only get the first suggestion from the list of suggestions {String} ex: hello
+                suggestion: suggestion // suggestion for the correct spelling with preserved case. only get the first suggestion from the list of suggestions {String} ex: hello
             });
         }
 
@@ -230,4 +278,5 @@ define(function (require, exports, module) {
     exports.getCurrentWord = getCurrentWord;
     exports.fixCurrentMisspelledWord = fixCurrentMisspelledWord;
     exports.getAllWordsInFile = getAllWordsInFile;
+    exports.preserveCase = preserveCase;
 });

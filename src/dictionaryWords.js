@@ -90,13 +90,17 @@ define(function (require, exports, module) {
 
         // Get all words in the file
         const allWordsInFile = Helper.getAllWordsInFile(editor);
-        const dictionaryWords = Preferences.getDictionaryWords();
 
-        // Find words that are both in the file and in the dictionary list
+        // Find words that are both in the file and in the dictionary list (case-insensitive)
         const wordsToRemove = [];
         allWordsInFile.forEach(function(word) {
-            if (dictionaryWords.indexOf(word) !== -1 && wordsToRemove.indexOf(word) === -1) {
-                wordsToRemove.push(word);
+            // Check if this word is in dictionary (case-insensitive)
+            if (Preferences.isWordInDictionary(word)) {
+                // Find the exact case match in dictionary words to remove
+                const exactMatch = Preferences.findDictionaryWordExactCase(word);
+                if (exactMatch && wordsToRemove.indexOf(exactMatch) === -1) {
+                    wordsToRemove.push(exactMatch);
+                }
             }
         });
 
@@ -122,11 +126,10 @@ define(function (require, exports, module) {
         }
 
         const allWordsInFile = Helper.getAllWordsInFile(editor);
-        const dictionaryWords = Preferences.getDictionaryWords();
 
-        // Check if any word in the file is in the dictionary list
+        // Check if any word in the file is in the dictionary list (case-insensitive)
         for (let i = 0; i < allWordsInFile.length; i++) {
-            if (dictionaryWords.indexOf(allWordsInFile[i]) !== -1) {
+            if (Preferences.isWordInDictionary(allWordsInFile[i])) {
                 return true;
             }
         }
