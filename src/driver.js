@@ -100,6 +100,10 @@ define(function (require, exports, module) {
      */
     async function driver() {
         const editor = EditorManager.getActiveEditor();
+        if(!editor) {
+            return;
+        }
+
         const fileData = getFileData(editor);
         if (!fileData) {
             return;
