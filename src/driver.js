@@ -56,6 +56,13 @@ define(function (require, exports, module) {
                 lines.push(editor.getLine(i));
             }
             const content = lines.join("\n");
+
+            // Calculate the offset where the extracted content starts in the full document
+            let documentOffsetAdjustment = 0;
+            for (let i = 0; i < fromLine; i++) {
+                documentOffsetAdjustment += editor.getLine(i).length + 1; // +1 for newline character
+            }
+
             // get ignored words and dictionary words
             const ignoreWords = IgnoreWords.getIgnoredWords();
             const dictionaryWords = DictionaryWords.getDictionaryWords();
@@ -73,10 +80,12 @@ define(function (require, exports, module) {
                 (error) => error.lineNumber < fromLine || error.lineNumber > toLine
             );
 
-            // Process new errors and adjust line numbers
+            // Process new errors and adjust all position-related fields
             const newErrors = Helper.getRequiredDataFromErrors(resultIssues).map((error) => ({
                 ...error,
-                lineNumber: error.lineNumber + fromLine
+                lineNumber: error.lineNumber + fromLine,
+                documentOffset: error.documentOffset + documentOffsetAdjustment,
+                lineOffset: error.lineOffset + documentOffsetAdjustment
             }));
 
             // Combine and display errors
