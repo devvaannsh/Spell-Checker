@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     const Driver = require("./src/driver");
     const UI = require("./src/UI");
     const ContextMenu = require("./src/contextMenu");
+    const EditMenu = require("./src/editMenu");
 
     let nodeConnector;
 
@@ -19,8 +20,9 @@ define(function (require, exports, module) {
 
             UI.registerSpellChecker();
             Driver.registerHandlers();
-            Driver.driver();
             ContextMenu.init();
+            EditMenu.init();
+            Driver.driver();
         } catch (error) {
             console.error("Failed to initialize spell checker:", error);
         }

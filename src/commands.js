@@ -1,4 +1,5 @@
 define(function (require, exports, module) {
+    const SPELL_CHECKER_EDIT_MENU = "spell_checker";
     const SPELL_CHECKER_SUBMENU_ID = "spell-checker-submenu";
     const FIX_TYPO = "spellchecker.fixTypo";
     const FIX_ALL_TYPOS_IN_FILE = "spellchecker.fixAllTyposInFile";
@@ -11,6 +12,7 @@ define(function (require, exports, module) {
     const TOGGLE_SPELL_CHECKER = "spellchecker.toggleSpellChecker";
     const TOGGLE_SPELL_CHECKER_FILE = "spellchecker.toggleSpellCheckerFile";
 
+    exports.SPELL_CHECKER_EDIT_MENU = SPELL_CHECKER_EDIT_MENU;
     exports.SPELL_CHECKER_SUBMENU_ID = SPELL_CHECKER_SUBMENU_ID;
     exports.FIX_TYPO = FIX_TYPO;
     exports.FIX_ALL_TYPOS_IN_FILE = FIX_ALL_TYPOS_IN_FILE;

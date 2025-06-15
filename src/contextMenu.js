@@ -12,6 +12,7 @@ define(function (require, exports, module) {
     const Driver = require("./driver");
     const Helper = require("./helper");
     const UI = require("./UI");
+    const EditMenu = require("./editMenu");
 
     let subMenu;
 
@@ -21,6 +22,9 @@ define(function (require, exports, module) {
     function toggleSpellChecker() {
         const currentlyDisabled = Preferences.isSpellCheckerDisabled();
         Preferences.setSpellCheckerDisabled(!currentlyDisabled);
+
+        // Update the edit menu checkmark to stay in sync
+        EditMenu.updateMenuCheckmark();
 
         // Re-run driver to apply changes immediately
         Driver.driver();
